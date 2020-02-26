@@ -1,0 +1,9 @@
+<chart palette='4' caption=''  showValues='0' decimals='0' formatNumberScale='0' useRoundEdges='1' showBorder="0"  bgColor='FFFFFF' >
+  <set label="PMTCT" value="23" /> 
+  <set label="Routine EPI" value="67" /> 
+<set label="Outreach" value="19" /> 
+<set label="OPD" value="56" /> 
+<set label="ART" value="95" /> 
+<set label="Inpatient" value="74" /> 
+<set label="Other" value="35" /> 
+</chart>

@@ -1,0 +1,49 @@
+<html>
+<head>
+	<title>
+	FusionMaps Client-side Export Sample - Multiple Maps - Individual export handler for each
+	</title>
+	<script language="JavaScript" src="../../../JSClass/FusionMaps.js"></script>
+	<script language="JavaScript" src="../../../JSClass/FusionMapsExportComponent.js"></script>
+</head>
+
+<body bgcolor="#ffffff">
+
+	<table align='center'>
+	<tr>
+	<td>
+	<div id="mapdiv" align="center">The map will appear within this DIV. This text will be replaced by the map.</div>
+   <script type="text/javascript">
+	var myMap = new FusionMaps("../../../Maps/FCMap_World.swf", "myMapId", "500", "266", "0", "1");
+	myMap.setDataURL("SimpleExample.xml");
+	myMap.render("mapdiv");
+   </script>
+	</td>
+	<td>
+	<div id="fcexpDiv" align="center">FusionMaps Export Handler Component</div>
+	<script type="text/javascript">
+    var myExportComponent = new FusionMapsExportObject("fcExporter1", "../../../Maps/FCExporter.swf");
+    myExportComponent.Render("fcexpDiv");
+    </script>
+  	</td>
+	</tr>
+	<tr>
+	<td>
+	<div id="mapdiv2" align="center">The map will appear within this DIV. This text will be replaced by the map.</div>
+   <script type="text/javascript">
+	var myMap2 = new FusionMaps("../../../Maps/FCMap_USA.swf", "myMapId2", "500", "266", "0", "1");
+	myMap2.setDataURL("SimpleExample2.xml");
+	myMap2.render("mapdiv2");
+    </script>
+	</td>
+	<td>
+	<div id="fcexpDiv2" align="center">FusionMaps Export Handler Component</div>
+	<script type="text/javascript">
+    var myExportComponent2 = new FusionMapsExportObject("fcExporter2", "../../../Maps/FCExporter.swf");
+    myExportComponent2.Render("fcexpDiv2");
+    </script>
+	</td>
+	</tr>
+	</table>
+</body>
+</html>

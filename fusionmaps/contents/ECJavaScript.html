@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<!-- InstanceBegin template="/Templates/Documentation Page.dwt" codeOutsideHTMLIsLocked="false" -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<!-- InstanceBeginEditable name="doctitle" -->
+<title>FusionMaps Export API Documentaion - Overview</title>
+<!-- InstanceEndEditable -->
+<script type="text/javascript" src="JS/lib.js"></script>
+<link rel="stylesheet" type="text/css" href="assets/prettify/prettify.css">
+<script type="text/javascript" src="assets/prettify/prettify.js"></script>
+<link rel="stylesheet" type="text/css" href="css/typoset.css">
+<!-- InstanceBeginEditable name="head" -->
+<style type="text/css">
+table caption { text-align:left; font-weight: bold; font-family:Verdana, Arial, Helvetica, sans-serif; font-size: 11px;
+	padding-bottom: 6px; }
+table td { padding-bottom: 10px;}
+table td p { margin: 0; }
+</style>
+<!-- InstanceEndEditable -->
+</head>
+<body>
+<div id="wrapper">
+  <noscript class="hl-red">
+  &nbsp;<br />
+  For maximum compatibility, it is requested that you browse this page in a JavaScript enabled browser.
+  </noscript>
+  <div id="topshadow"></div>
+  <div id="viewport">
+    <h2><!-- InstanceBeginEditable name="pagetitle" -->Exporting maps as PDF/Images &gt; Exporting from JavaScript<!-- InstanceEndEditable --></h2>
+    <div id="contents"><!-- InstanceBeginEditable name="pagebody" -->
+      <p>In this section, we will discuss how we can export maps using JavaScript. First we will start with the simplest of examples and then move on to the harder ones.</p>
+      <blockquote> <strong>Important:</strong><br />
+        The JavaScript method will only work when the map has been fully rendered in the client browser. You can use the FC_Rendered method to track the same.<br />
+      &nbsp;<br />
+      Due Adobe Flash Player's default security system, the JavaScript method does not work from local filesystem. It only works when hosted on a server (localhost or remote) unless configured otherwise.</blockquote>
+      <h3>Simple JavaScript-Triggered Export</h3>
+      <p>In this example, we would first require you to create a map on your page. Then use an HTML button to initiate the export process on that map.</p>
+      <p>To achieve this, we will have to do the following:</p>
+      <ol>
+        <li>Create an HTML page with a map in it.</li>
+        <li>Setup the XML of the map to enable exporting.</li>
+        <li>Create a JavaScript function to initiate exporting of the map.</li>
+        <li>Insert an HTML button to call the above JavaScript.</li>
+      </ol>
+      <p>&nbsp;</p>
+      <p><strong>Create your page with a map in it:</strong></p>
+      <p>The process involves including the FusionMaps.js file within the <span class="code-inline">&lt;head&gt;</span> section of your newly created HTML page. Then follow the standard process to load a map using the <span class="code-inline">FusionMaps</span> JavaScript object. (You may refer to <a href="JSEmbed.html">JavaScript Embedding</a> article under &quot;Creating your First Map&quot; section.)</p>
+      <p>The JavaScript code to create a map will appear like below:</p>
+      <p>
+      <pre class="prettyprint lang-js">var myMap = new FusionMaps('FusionMaps/FCMap_World.swf', 'myMap', '400', '300', '0', '1');<br />
+myMap.setDataURL('Data.xml');<br />
+myMap.render('mapContainerDiv');</pre>
+      <blockquote>Note that the <strong>registerWithJS</strong> parameter while initializing your map must be set to '1' for the maps to respond to your JavaScripts.</blockquote>
+      <p>&nbsp;</p>
+      <p><strong>Adjust your Data XML to enable exporting:</strong></p>
+      <p>For this example, we will be export at a PHP server, with a default action of &quot;Download&quot;. For more information on server-side exporting, refer to our <a href="ECServerOverview.html">Server-side exporting</a> section. The XML to do so will be like below (the attributes pertinent to exporting is marked in bold) and the file will be saved as &quot;Data.xml&quot; beside your HTML file:</p>
+      <pre class="prettyprint lang-xml"><p>&lt;map borderColor='005879' fillColor='D7F4FF' numberSuffix=' Mill.' includeValueInLabels='0' labelSepChar=': ' baseFontSize='9'  <br />exportEnabled='1' exportAtClient='0' exportAction='download' <br />exportHandler='http://www.domain.com/ExportHandlers/FCExporter.php' exportFileName='MyFileName'&gt;
+	&lt;colorRange&gt;<br />		&lt;color minValue='0' maxValue='500' displayValue='Sparsely Populated' color='A7E9BC' /&gt;<br />		&lt;color minValue='500' maxValue='1000' displayValue='Well Populated' color='FFFFCC' /&gt;<br />		&lt;color minValue='1000' maxValue='5000' displayValue='Densely Populated' color='FF9377' /&gt;<br />	&lt;/colorRange&gt;<br />	&lt;data&gt;<br />		&lt;entity id='NA' value='515' /&gt;<br />		&lt;entity id='SA' value='373' /&gt;<br />		&lt;entity id='AS' value='3875' /&gt;<br />		&lt;entity id='EU' value='727' /&gt;<br />		&lt;entity id='AF' value='885' /&gt;<br />		&lt;entity id='AU' value='32' /&gt;<br />	&lt;/data&gt;		<br />&lt;/map&gt;<br /></p></pre>
+      <blockquote> The exporting procedure to export at client-side is almost similar, except that additional steps are required to setup the client-side Export Component. For more information, refer to the Client-side exporting section.</blockquote>
+      <p>&nbsp;</p>
+      <p><strong>Now, we write our JavaScript function to initiate exporting on that map:</strong></p>
+      <p>The JavaScript function uses the simple unction provided within FusionMaps.js to locate the map SWF from its id. Then it calls the new &quot;exportMap()&quot; function on the map. Note that we have first verified whether the map has fully rendered by calling the new hasRendered() function of the map.</p>
+      <pre class="prettyprint lang-js"><p>&lt;script type=&quot;text/javascript&quot;&gt;</p><p>    function ExportMyMap() {</p><p>         var mapObject = getMapFromId('myMap');</p><p>         if( mapObject.hasRendered() ) mapObject.exportMap();</p><p>    }</p><p> &lt;/script&gt;      </p></pre>
+      <p>Now that we have all our codes ready, we assemble them within one HTML file and see the results...</p>
+      <p><strong>The Final code will look like this:</strong></p>
+      <pre class="prettyprint lang-html"><p>&lt;html&gt;</p><p>&lt;head&gt;</p><p>    &lt;title&gt;My Map&lt;/title&gt;</p><p>    &lt;script type=&quot;text/javascript&quot; src=&quot;FusionMaps/FusionMaps.js&quot;&gt;&lt;/script&gt;</p><p>    &lt;script type=&quot;text/javascript&quot;&gt;</p><p>        function ExportMyMap() {</p><p>            var mapObject = getMapFromId('myMap');</p><p>            if( mapObject.hasRendered() ) mapObject.exportMap();</p>&nbsp;</p>    }<p>    &lt;/script&gt;</p><p>&lt;/head&gt;</p><p>&lt;body&gt;</p><p>    &lt;div id=&quot;mapContainerDiv&quot;&gt;FusionMaps loaded here...&lt;/div&gt;</p><p>    &lt;script type=&quot;text/javascript&quot;&gt;</p><p>        var myMap = new FusionMaps('FusionMaps/FCMap_world.swf', 'myMap', '400', '300', '0', '1');</p><p>        myMap.setDataURL('Data.xml');</p><p>        myMap.render('mapContainerDiv');</p><p>    &lt;/script&gt;</p><p>    &lt;input type=&quot;button&quot; value=&quot;Export My Map&quot; onclick=&quot;ExportMyMap()&quot; /&gt;</p><p>&lt;/body&gt;</p><p>&lt;/html&gt;</p></pre>
+      <p>After this, we open this file in a browser and click on the &quot;Export My Map&quot; button and the map will start exporting all by itself! In case you face any error, refer to &quot;<a href="ECReferenceDebugJS.html">Debug Mode</a>&quot; section under &quot;JavaScript Reference&quot;</p>
+      <p>&nbsp;</p>
+      <h3>Providing Export Parameters (Overriding XML Export Attributes) using JavaScript:</h3>
+      <p>The new FusionMaps (v3.1 and above) allows you to provide values for XML attributes via JavaScript as well. The <span class="code-inline">exportMap()</span> function also takes in a parameter that accepts these XML attributes in a JSON object notation.</p>
+      <p>Not all XML attributes are overridable. The list of export-related XML attributes that can be overridden, can be found under the &quot;Export Attributes&quot; section under &quot;JavaScript Reference.&quot; You can provide export attributes in {key1: 'value1', key2: 'value2', ...} format as shown below:</p>
+      <pre class="prettyprint lang-js"><p>&lt;script type=&quot;text/javascript&quot;&gt;</p><p>    function ExportMyMap() {</p><p>         var mapObject = getMapFromId('myMap');</p><p>         mapObject.exportMap( <strong>{ exportAtClient: '1',  exportFormat: 'PDF' }</strong> );</p><p>    }</p><p> &lt;/script&gt;</p>
+      </pre>
+      <p>&nbsp;</p>
+    <!-- InstanceEndEditable --></div>
+    <div id="footer"><!-- InstanceBeginEditable name="pageFooter" --><!-- InstanceEndEditable --></div>
+  </div>
+</div>
+</body>
+<!-- InstanceEnd -->
+</html>

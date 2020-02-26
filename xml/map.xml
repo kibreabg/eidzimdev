@@ -1,0 +1,19 @@
+<map showBevel='0' showMarkerLabels='1' fillColor='FFFFCC' borderColor='000000' hoverColor='efeaef' canvasBorderColor='FFFFFF' baseFont='Verdana' baseFontSize='10' markerBorderColor='000000' markerBgColor='FF5904' markerRadius='6' legendPosition='bottom' useHoverColor='1' showMarkerToolTip='1'  >
+	<colorRange>
+        <color minValue='0' maxValue='3000' displayValue='Low Testing' color='069F06' />
+        <color minValue='3000' maxValue='4000' displayValue='Moderate Testing' color='CC0001' />
+        <color minValue='5000' maxValue='7000' displayValue='High Testing' color='FFFFCC' />
+   </colorRange>
+   <data>
+		<entity id='01' value='3724'   />
+		<entity id='02' value='3698'/>
+		<entity id='03' value='3751'/>
+		<entity id='05' value='8417' />
+		<entity id='06' value='34' />
+		<entity id='07' value='18333' />
+		<entity id='08' value='4414'/>
+		<entity id='09' value='5154' />
+		<entity id='10' value='5154'  />
+	</data>
+	
+</map>

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="iso-8859-1"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>FusionMaps v3 Documentation</title>
+<link rel="stylesheet" href="Style.css" type="text/css" />
+</head>
+
+<body>
+<table width="98%" border="0" cellspacing="0" cellpadding="3" align="center">
+  <tr> 
+    <td><h2 class="pageHeader">Exporting Maps as PDF or Images &gt; Client-side export &gt; Setting JavaScript callback </h2></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>When using FusionMaps Export component, you can configure the component to invoke a callback JavaScript method, when the map has been saved by user. This is useful for tracking whether the exported maps have been saved by your user. </p>
+    <p>By default, the invoked function name is <span class="codeInline">FC_Exported(objRtn)</span>. You can, however, call a different function as well by specifying the following in your map XML: </p>
+    <p class="codeInline">&lt;map .. exportCallback='myCallBackFunction' ...&gt;</p>
+    <p>And you then need to define this function in your JavaScript code.  However, if you do not define any call back function in your XML, the  default callback function <span class="codeInline">FC_Exported</span> is invoked. In either case, an object is passed to the function as <span class="codeInline">FC_Exported(objRtn)</span> or <span class="codeInline">myCallBackFunction(objRtn)</span>, which contains the following parameters (returned from Export Component):</p>
+    <ul>
+      <li><span class="codeInline">statusCode</span> - Has the value of 1 in case of success, and 0 in case of failure.</li>
+      <li><span class="codeInline">statusMessage</span> - In case of  failure, this parameter contains a string description of the error (returned by server)</li>
+      <li><span class="codeInline">fileName</span> - If saving was successful, this parameter contains the HTTP reference to the image/PDF file saved on server</li>
+      <li><span class="codeInline">width</span> &amp; <span class="codeInline">height</span> - If saving was successful, these parameters contain the width/height of saved image. Else, they contain 0. </li>
+      <li><span class="codeInline">DOMId</span> - DOMId of the map that was successfully exported. </li>
+    </ul>
+    <p>Let's  quickly see an example code where a callback function has been  implemented. In this example, once the user has saved the exported map on his disk (after clicking the Save button for the same), we just show it in a JavaScript alert. </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock"><p>&lt;html&gt;<br />
+      &lt;head&gt;<br />
+      &lt;script language=&quot;JavaScript&quot; src=&quot;../../FusionMaps/FusionMaps.js&quot;&gt;&lt;/script&gt;<br />
+  &lt;script language=&quot;JavaScript&quot; src=&quot;../../FusionMaps/FusionMapsExportComponent.js&quot;&gt;&lt;/script&gt;<br />
+  &lt;script type=&quot;text/javascript&quot;&gt;<br />
+  <span class="codeComment">&nbsp;&nbsp;//Default callback function that gets invoked when user has finished saving the exported output to his disk</span> <br />
+&nbsp;&nbsp;<strong>function FC_Exported(objRtn){<br />
+&nbsp;&nbsp;&nbsp;if (objRtn.statusCode==&quot;1&quot;){<br />
+&nbsp;&nbsp;&nbsp;&nbsp;alert(&quot;The map was successfully saved. Its DOM Id is &quot; + objRtn.DOMId);<br />
+&nbsp;&nbsp;&nbsp;} else{<br />
+&nbsp;&nbsp;&nbsp;&nbsp;alert(&quot;There was an error saving the map. Error message: &quot; + objRtn.statusMessage + &quot;. Its DOM Id is &quot; + objRtn.DOMId);<br />
+&nbsp;&nbsp;&nbsp;}<br />
+&nbsp;&nbsp;} </strong><br />
+&lt;/script&gt;<br />
+&lt;/head&gt;</p>
+      <p>&lt;body bgcolor=&quot;#ffffff&quot;&gt;<br />
+        &lt;div id=&quot;mapdiv&quot; align=&quot;center&quot;&gt;The map will appear within this DIV. This text will be replaced by the map.&lt;/div&gt;<br />
+        &lt;script type=&quot;text/javascript&quot;&gt;<br />
+        <span class="codeComment">//Create the map.<br />
+//Note that you necessarily need to set the registerWithJS attribute as 1, as JavaScript is used for client-<br />
+//side communication between the map and FusionMaps Exporter Component.</span><br />
+var myMap = new FusionMaps(&quot;../../../Maps/FCMap_World.swf&quot;, &quot;myMapId&quot;, &quot;500&quot;, &quot;266&quot;, &quot;0&quot;, &quot;1&quot;);<br />
+myMap.setDataURL(&quot;Callback.xml&quot;);<br />
+myMap.render(&quot;mapdiv&quot;);<br />
+&lt;/script&gt;</p>
+      <p> <span class="codeComment">&lt;!-- We also create a DIV to contain the FusionMaps client-side exporter component --&gt;</span><br />
+  &lt;div id=&quot;fcexpDiv&quot; align=&quot;center&quot;&gt;FusionMaps Export Handler Component&lt;/div&gt;<br />
+  &lt;script type=&quot;text/javascript&quot;&gt;<br />
+        <span class="codeComment">//Render the export component in this<br />
+        //Note: fcExporter1 is the DOM ID of the DIV and should be specified as value of exportHandler<br />
+        //attribute of map XML.</span><br />
+      var myExportComponent = new FusionMapsExportObject(&quot;fcExporter1&quot;, &quot;../../../Maps/FCExporter.swf&quot;);</p>
+      <p> <span class="codeComment">//Render the exporter SWF in our DIV fcexpDiv</span><br />
+        myExportComponent.Render(&quot;fcexpDiv&quot;);<br />
+  &lt;/script&gt;</p>
+      <p>&lt;/body&gt;<br />
+        &lt;/html&gt;<br />
+    </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="header">FC_ExportReady event </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>At times, you might want  to track the event when the map has finished its capture phase and has passed the data to export component, but user has not saved the image/PDF on his disk. Between initiation of map export and till the time <span class="codeInline">FC_ExportReady</span> event is raised, you might show a waiting message/alert to the user that the map is in processing stage. </p>
+    <p>The syntax of event is <span class="codeInline">FC_ExportReady(DOMId)</span>. You can use <span class="codeInline">DOMId</span> (string) as the identifier for each map to check which map has finished processing. </p>
+    <p>The following code explains its usage: </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock">&lt;script type=&quot;text/javascript&quot;&gt;<br />
+      <span class="codeComment">&nbsp;&nbsp;&nbsp;//This event is raised when the map has finished capture phase and passed the data to <br />
+&nbsp;&nbsp;&nbsp;//Export Component for further processing<br />
+      </span>&nbsp;&nbsp;&nbsp;function FC_ExportReady(DOMId){<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;alert(&quot;The map with DOM ID as &quot; + DOMId + &quot; has finished capture mode. It's now ready to be downloaded&quot;);<br />
+&nbsp;&nbsp;&nbsp;} <br />
+&lt;/script&gt;</td>
+  </tr>
+</table>
+</body>
+</html>

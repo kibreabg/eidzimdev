@@ -1,0 +1,5 @@
+<chart palette='2' caption=''  showValues='0' decimals='0' formatNumberScale='0' useRoundEdges='1' showBorder="0"  bgColor='FFFFFF' >
+<set label='CS' value='462' toolText='Ceasarian' />
+<set label='VG' value='325' toolText='Vaginal' />
+<set label='UC' value='628' toolText='Unclear' />
+</chart>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="iso-8859-1"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>FusionMaps v3 Documentation</title>
+<link rel="stylesheet" href="Style.css" type="text/css" />
+</head>
+
+<body>
+<table width="98%" border="0" cellspacing="0" cellpadding="3" align="center">
+  <tr> 
+    <td><h2 class="pageHeader">Exporting Maps as PDF or Images &gt; How it works? </h2></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>The entire FusionMaps export process is a multi-step process involving various elements, including:</p>
+      <ul>
+        <li>The map itself - This is the SWF file that you embed in your page to generate the map. The map is responsible to take its own snapshot so that further processes can take place.</li>
+        <li>FusionMaps JavaScript class (<span class="codeInline">FusionMaps.js</span>) - The JavaScript class used to embed the map. </li>
+        <li>FusionMaps Export Handlers (Server-side)- In case of server-side export, these server-side scripts accept and convert the bitmap snapshot of maps into images/PDFs.</li>
+        <li>FusionMaps Export Component (Client-side) - In case of client-side export, FusionMaps Export Component accepts the bitmap snapshot of map and converts into the required export format. This is present as a Flash 10 SWF file. </li>
+        <li>FusionMaps Export Component JavaScript class (<span class="codeInline">FusionMapsExportComponent.js</span>) - This JavaScript class helps you  initiate the FusionMaps Export Component object and to set the JavaScript communication channel between the map and FusionMaps Export Component. It has additional logic for cross-browser compatibility and error handling. </li>
+      </ul>
+    <p>These elements combined provide an elegant approach that allow you to export FusionMaps as images. </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="header">FusionMaps is Flash. So how does it generate an image?  </td>
+  </tr>
+  <tr> 
+    <td valign="top" class="text"><p>Yes - we agree that FusionMaps is a set of SWF files that take in XML data and render maps. It uses Adobe Flash Player to do the same. Remember that all of this happens in your browser - the SWF is downloaded, XML is downloaded and then parsed and finally rendered as a map.</p>
+      <p>So, after the map has rendered in your browser, you can now invoke the export process of FusionMaps using either context menu of map, or JavaScript API. This is called the <strong>Trigger phase</strong>. When you do this, the following processes take place:</p>
+      <ol>
+        <li>First, the map reads the export process related parameters from the XML data. These parameters help you configure whether to export at client side, or server side. You can also configure cosmetic properties of the Export map dialog box.</li>
+        <li>The map now enters into what is called the <strong>Capture Phase</strong>. In this phase, the map takes a bitmap snapshot of itself. It takes a few seconds to do that depending on the size of the map. During this time, the map displays a &quot;Capturing data&quot; dialog box, the cosmetics of which are totally customizable.</li>
+        <li>Once the &quot;Capture Phase&quot; is over, the map now sends this data to <strong>FusionMaps Export handlers</strong>, as explained later. This is the start of <strong>Process Phase</strong>.</li>
+        <li> The Export handlers accept the data, process it, and finally return an image/PDF based on the choice of user, which marks the end of Process Phase.</li>
+        <li>In the  final phase called <strong>Callback phase</strong>, the export handler can now invoke callback JavaScript functions to notify you that the export process has completed.</li>
+      </ol>
+      <p>The entire process can be visualized as under: </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><img src="Images/ECTCPCModel.jpg" /></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>&nbsp;</p>
+      <p class="highlightBlock">We wish to lay emphasis on one point again - Whenever a map needs to export as image/PDF (either server-side or client-side), it first <strong>necessarily </strong>needs to render itself in browser. Once it has rendered in the browser, you can then invoke the JavaScript API to automatically start the export process, without needing any user action.</p>
+      <p>While the list looks scary at the first sight, let us assure you that setting up all these things is just a matter of minutes, involving just copying-pasting some files here and there, and configuring your XML for export related parameters. You do NOT need to write any of your own code to handle any of this - we've done the hard work so that you can relish it! </p>
+    <p>With that assurance, let's first quickly learn the various terminologies associated with FusionMaps Export process for once and for all! </p></td>
+  </tr>
+</table>
+</body>
+</html>

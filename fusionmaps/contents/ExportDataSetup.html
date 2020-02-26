@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="iso-8859-1"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>FusionMaps v3 Documentation</title>
+<link rel="stylesheet" href="Style.css" type="text/css" />
+</head>
+
+<body>
+<table width="98%" border="0" cellspacing="0" cellpadding="3" align="center">
+  <tr> 
+    <td><h2 class="pageHeader">Exporting Map Data &gt; Using Context Menu </h2></td>
+  </tr>
+  <tr> 
+    <td valign="top" class="text"><p>FusionMaps allows you to export data from your maps in CSV format. The export of data can be triggered in two ways:</p>
+      <ul>
+        <li>Using the context menu of map, which copies the generated CSV data to clipboard</li>
+        <li>Using FusionMaps JavaScript API for data export, which returns the CSV data as string in your JavaScript code</li>
+      </ul>
+    <p>Let's study both of them one by one. </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="header">Setting up the map to export data from context menu </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">To allow export of data using context menu, you need to specify the following in XML: </td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock"><p>&lt;map borderColor='005879' fillColor='D7F4FF' numberSuffix='           Mill.' includeValueInLabels='1' labelSepChar=': ' baseFontSize='9' <strong>showExportDataMenuItem</strong>='1'&gt;<br />
+&nbsp;&nbsp; &lt;data&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;entity id='NA' value='515'           /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;entity id='SA' value='373'           /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;entity id='AS' value='3875'           /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;entity id='EU' value='727'           /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;entity id='AF' value='885'           /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;entity id='AU' value='32'           /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/data&gt;&nbsp;&nbsp;&nbsp;&nbsp; <br />
+&lt;/map&gt;</p>    </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">As soon as <span class="codeInline">showExportDataMenuItem='1'</span> is set in the map, a new item is added to the map's context menu, as shown below: </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><img src="Images/ExportDataClip1.gif" width="484" height="379" /></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>The label of this menu item can be customized by setting:</p>
+      <p class="codeInline">&lt;map ... exportDataMenuItemLabel='Copy the data of this map' ...&gt;</p>
+      <p class="text">When you select this item, the data of this map will be copied to your clipboard. If you open any text editor and paste the content of the clipboard, you'll get something as under: </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock">&quot;Id&quot;,&quot;Short Name&quot;,&quot;Long Name&quot;,&quot;Value&quot;<br />
+      &quot;NA&quot;,&quot;NA&quot;,&quot;North America&quot;,&quot;515&quot;<br />
+      &quot;SA&quot;,&quot;SA&quot;,&quot;South America&quot;,&quot;373&quot;<br />
+      &quot;EU&quot;,&quot;EU&quot;,&quot;Europe&quot;,&quot;727&quot;<br />
+      &quot;AS&quot;,&quot;AS&quot;,&quot;Asia&quot;,&quot;3875&quot;<br />
+      &quot;AF&quot;,&quot;AF&quot;,&quot;Africa&quot;,&quot;885&quot;<br />
+    &quot;AU&quot;,&quot;AU&quot;,&quot;Australia&quot;,&quot;32&quot;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">This is basically the CSV representation of your map's data. Let us next see how to format the output CSV data using various export related XML attributes that FusionMaps exposes. </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="header">Customizing the output CSV format </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>You can customize the following aspects of the output CSV data:</p>
+      <ul>
+        <li>The separator character to be used for data. By default this is CSV.</li>
+        <li>The qualifier character to be used. By default this is double quotes.</li>
+        <li>Whether to output formatted data values (as shown on map) in CSV, or raw values.   </li>
+      </ul>
+    <p>The following attributes help in configuring this: </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><table width="100%" border="1" cellpadding="2" cellspacing="0" bordercolor="f1f1f1">
+      <tr>
+        <td width="15%" valign="top" class="textBold">Attribute</td>
+        <td width="60%" class="textBold">Description</td>
+        <td width="25%" class="textBold">Example</td>
+      </tr>
+      <tr>
+        <td width="15%" valign="top" class="codeInline">exportDataSeparator</td>
+        <td width="60%" class="text"><p>Lets you set the separator for CSV data. For ease of use, this attribute accepts the following pseudo codes for characters:</p>
+          <ul>
+            <li>{tab} - To specify tab character</li>
+            <li>{quot} - To specify double quotes</li>
+            <li>{apos} - To specify single quotes   </li>
+            </ul>
+          <p>You can also specify any other character apart from these pseudo codes. </p></td>
+        <td width="25%" valign="top" class="codeInline">exportDataSeparator='{tab}'</td>
+      </tr>
+      <tr>
+        <td width="15%" valign="top" class="codeInline">exportDataQualifier</td>
+        <td width="60%" class="text"><p>Lets you set the qualifier character for CSV data. For ease of use, this attribute accepts the following pseudo codes for characters:</p>
+          <ul>
+            <li>{tab} - To specify tab character</li>
+            <li>{quot} - To specify double quotes</li>
+            <li>{apos} - To specify single quotes </li>
+          </ul>
+          <p>You can also specify any other character apart from these pseudo codes. </p></td>
+        <td width="25%" valign="top" class="codeInline">exportDataQualifier='{quot}'</td>
+      </tr>
+      <tr>
+        <td width="15%" valign="top" class="codeInline">exportDataFormattedVal</td>
+        <td width="60%" class="text">Boolean value indicating whether to output formatted data values (as shown on map) in the output CSV file. </td>
+        <td width="25%" valign="top" class="codeInline">exportDataFormattedVal='1'</td>
+      </tr>
+    </table></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>In the next section, we'll see how to access this data using JavaScript API. </p>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

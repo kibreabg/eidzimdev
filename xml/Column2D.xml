@@ -1,0 +1,12 @@
+<chart palette='2' caption=''  showValues='0' decimals='0' formatNumberScale='0' useRoundEdges='1' showBorder="0"  bgColor='FFFFFF' >
+<set label='MN' value='462' toolText='Matebeland North' />
+<set label='MI' value='427' toolText='Midlands' />
+<set label='MW' value='761' toolText='Mashonaland West' />
+<set label='MC' value='462' toolText='Mashonaland Central' />
+<set label='ME' value='325' toolText='Mashonaland East' />
+<set label='MA' value='628' toolText='Manicaland' />
+<set label='MV' value='387' toolText='Masvingo' />
+<set label='MS' value='143' toolText='Matebeland South' />
+<set label='HA' value='843' toolText='Harare' />
+<set label='BU' value='654' toolText='Bulawayo' />
+</chart>

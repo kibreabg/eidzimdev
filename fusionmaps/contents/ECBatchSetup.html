@@ -1,0 +1,352 @@
+<?xml version="1.0" encoding="iso-8859-1"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>FusionMaps v3 Documentation</title>
+<link rel="stylesheet" href="Style.css" type="text/css" />
+</head>
+
+<body>
+<table width="98%" border="0" cellspacing="0" cellpadding="3" align="center">
+  <tr> 
+    <td><h2 class="pageHeader">Exporting Maps as PDF or Images &gt; Batch export &gt; Setting it up </h2></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>Here, we'll cover examples for setting up batch exporting of maps. We'll first start with the simplest example and then move ahead by configuring various parameters.</p>
+      <p>Before you start, you'll need to follow these steps:</p>
+      <ol>
+        <li>Copy <span class="codeInline">FusionMapsExportComponent.js</span> from <span class="codeInline">Download Package &gt; JSClass</span> to your server. A good location is where you've placed <span class="codeInline">FusionMaps.js</span></li>
+        <li>Copy <span class="codeInline">FCExporter.swf</span> from <span class="codeInline">Download Package &gt; Maps</span> to your server. A good location is where you've placed the other map SWF files.</li>
+      </ol>
+    <p>With that done, our next few steps are:</p>
+    <ol>
+      <li>Configure the maps  in your page to allow export of maps at client-side </li>
+      <li>Include an instance of Exporter Component in your web page</li>
+      <li>Invoke the BeginExport method of Exporter Component to start batch export </li>
+      </ol>
+    <p>Let's see how to implement each of them in details. </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="header">Configuring XML for client-side export </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>In the XML of each map that you need to export, you need to do three things:</p>
+        <ul>
+          <li>Enable your map for export (using <span class="codeInline">exportEnabled</span> attribute) </li>
+          <li>Set it to use client-side export (using <span class="codeInline">exportAtClient</span> attribute) </li>
+          <li>Give reference (DOM Id) of the export component that we'll next create in the HTML page (using <span class="codeInline">exportHandler</span> attribute) </li>
+        </ul>
+      <p>The following XML snippet shows how to attain these: </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock"><p>&lt;map borderColor='005879' fillColor='D7F4FF' numberSuffix=' Mill.' includeValueInLabels='0' labelSepChar=': ' baseFontSize='9'  <strong>exportEnabled='1' exportAtClient='1' exportHandler='fcBatchExporter'</strong>&gt;<br />
+&nbsp;&nbsp;&lt;colorRange&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;color minValue='0' maxValue='500' displayValue='Sparsely Populated' color='A7E9BC' /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;color minValue='500' maxValue='1000' displayValue='Well Populated' color='FFFFCC' /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;color minValue='1000' maxValue='5000' displayValue='Densely Populated' color='FF9377' /&gt;<br />
+&nbsp;&nbsp;&lt;/colorRange&gt;<br />
+&nbsp;&nbsp;&lt;data&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;entity id='NA' value='515' /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;entity id='SA' value='373' /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;entity id='AS' value='3875' /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;entity id='EU' value='727' /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;entity id='AF' value='885' /&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;entity id='AU' value='32' /&gt;<br />
+&lt;/data&gt; <br />
+&lt;/map&gt;<br />
+    </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">We now create 3 maps in our page. All these maps, for the sake of example, use the same XML. </td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock"><p>&lt;div id=&quot;map1div&quot; align=&quot;center&quot;&gt;The map will appear within this DIV. This text will be replaced by the map.&lt;/div&gt;<br />
+  &lt;script type=&quot;text/javascript&quot;&gt;<br />
+      &nbsp;&nbsp;&nbsp;var myMap1 = new FusionMaps(&quot;../../../Maps/FCMap_World.swf&quot;, &quot;myMapId1&quot;, &quot;500&quot;, &quot;266&quot;, &quot;0&quot;, &quot;1&quot;);<br />
+      &nbsp;&nbsp;&nbsp;myMap1.setDataURL(&quot;SimpleExample.xml&quot;);<br />
+      &nbsp;&nbsp;&nbsp;myMap1.render(&quot;map1div&quot;);<br />
+  &lt;/script&gt;</p>
+      <p>&lt;div id=&quot;map2div&quot; align=&quot;center&quot;&gt;The map will appear within this DIV. This text will be replaced by the map.&lt;/div&gt;<br />
+  &lt;script type=&quot;text/javascript&quot;&gt;  <br />
+        &nbsp;&nbsp;&nbsp;var myMap2 = new FusionMaps(&quot;../../../Maps/FCMap_USA.swf&quot;, &quot;myMapId2&quot;, &quot;500&quot;, &quot;266&quot;, &quot;0&quot;, &quot;1&quot;);<br />
+        &nbsp;&nbsp;&nbsp;myMap2.setDataURL(&quot;SimpleExample.xml&quot;);<br />
+        &nbsp;&nbsp;&nbsp;myMap2.render(&quot;map2div&quot;);<br />
+  &lt;/script&gt;</p>
+      <p> &lt;div id=&quot;map3div&quot; align=&quot;center&quot;&gt;The map will appear within this DIV. This text will be replaced by the map.&lt;/div&gt;<br />
+  &lt;script type=&quot;text/javascript&quot;&gt;  <br />
+        &nbsp;&nbsp;&nbsp;var myMap3 = new FusionMaps(&quot;../../../Maps/FCMap_World.swf&quot;, &quot;myMapId3&quot;, &quot;500&quot;, &quot;266&quot;, &quot;0&quot;, &quot;1&quot;);<br />
+        &nbsp;&nbsp;&nbsp;myMap3.setDataURL(&quot;SimpleExample.xml&quot;);<br />
+        &nbsp;&nbsp;&nbsp;myMap3.render(&quot;map3div&quot;);<br />
+  &lt;/script&gt;      </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">Note that all the maps have <span class="codeInline">registerWithJS</span> set to 1 and their DOM IDs are <span class="codeInline">myMapId1</span>, <span class="codeInline">myMapId2</span> and <span class="codeInline">myMapId3</span> respectively. The next step is to add the exporter component to the page. </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="header">Creating instance of Export Component in your web page </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>The instance of the export component can be created in your web page easily using our <span class="codeInline">FusionMapsExportComponent</span> JavaScript class.</p>
+    <p> So, you first need to include the JavaScript class in your page as under. Make sure to include this page after <span class="codeInline">FusionMaps.js</span>, as this class references some of the objects defined in <span class="codeInline">FusionMaps.js</span>. This order of inclusion is important.</p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock">&lt;head&gt;<br />
+&nbsp;&nbsp;&nbsp;      &lt;script language=&quot;JavaScript&quot; src=&quot;../../FusionMaps/FusionMaps.js&quot;&gt;&lt;/script&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;script language=&quot;JavaScript&quot; src=&quot;../../FusionMaps/FusionMapsExportComponent.js&quot;&gt;&lt;/script&gt;<br />
+&lt;/head&gt;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">Now, using this class, you need to create an instance of this component in your page. For that, you first define an empty DIV and name it, as shown under: </td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock"><span class="codeComment">&lt;!-- We also create a DIV to contain the FusionMaps client-side exporter component --&gt;</span><br />
+&lt;div id=&quot;fcexpDiv&quot; align=&quot;center&quot;&gt;FusionMaps Export Handler Component&lt;/div&gt;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>As you can see above, the DIV has been named as <span class="codeInline">fcexpDiv</span>. </p>
+      <p class="highlightBlock">Note that you can place this DIV anywhere in your page - it's not necessary to place it beside the map. However, since the UI of this export component shows a button for initiating export, it's better to place it somewhere near the map so that your users can recognize it. </p>
+    <p>Next, you create an instance of the export component in your page using the following JavaScript code: </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock"><p>&lt;script type=&quot;text/javascript&quot;&gt;<br />
+        <span class="codeComment">//Note: fcExporter1 is the DOM ID of the DIV and should be specified as value of exportHandler<br />
+      //attribute of map XML.</span><br />
+      var myExportComponent = new FusionMapsExportObject(&quot;fcExporter1&quot;, &quot;../../FusionMaps/FCExporter.swf&quot;);</p>    </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>Here, we first create an instance of <span class="codeInline">FusionMapsExportObject</span>, which is the JavaScript class representation of FusionMaps Export Component. To this, we specify the DOM-Id of this export component instance - <span class="codeInline">fcExporter1</span> in this case. We also specify the location of the component SWF file as second parameter. </p>
+    <p>Next, we need to convey the list of maps that we intend to add to the batch. This is done by specifying all such DOM Ids of the maps in an array. This allows you to selectively configure the maps you want to add to your queue. Or, if you need to instantiate multiple batch exports, each with a different combination of maps, you can do so. </p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock"><span class="codeComment">//Add the maps to queue. The maps are referred to by their DOM Id.</span><br />
+myExportComponent.sourceMaps = ['myMapId1','myMapId2','myMapId3'];</td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">After this, we configure the export component UI to show in full mode, allow saving of output as individual or single file and to allow user to select the saving format. This is done using the following code: </td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock"><span class="codeComment">//Set the mode as full mode</span><br />
+myExportComponent.componentAttributes.fullMode='1';<br />
+<span class="codeComment">//Set saving mode as both. This allows users to download individual maps/ as well as download all maps as a single file.</span><br />
+myExportComponent.componentAttributes.saveMode='both';<br />
+<span class="codeComment">//Show allowed export format drop-down</span><br />
+myExportComponent.componentAttributes.showAllowedTypes = '1';</td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">We also set the cosmetic attributes of UI. </td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock"><span class="codeComment">//Width and height</span><br />
+myExportComponent.componentAttributes.width = '350';<br />
+myExportComponent.componentAttributes.height = '140';<br />
+<span class="codeComment">//Message - caption of export component</span><br />
+myExportComponent.componentAttributes.showMessage = '1';<br />
+myExportComponent.componentAttributes.message = 'Click on button above to begin export of maps. Then save from here.';</td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">Finally, we call the <span class="codeInline">Render</span> method of the class with our DIV id as parameter. This generates an instance of the exporter component in the specified DIV at run-time. </td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock"><span class="codeComment">//Render the exporter SWF in our DIV fcexpDiv</span><br />
+myExportComponent.Render(&quot;fcexpDiv&quot;);</td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">Now, all we need to do is invoke the BeginExport() API of batch method. </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="header">Invoking BeginExport method </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">We place a button in our page, which when clicked invokes this. The code is shown under: </td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock"><p><span class="codeComment">//Define a function, which will be invoked when user clicks the batch-export-initiate button</span><br />
+      function initiateExport(){<br />
+      &nbsp;&nbsp;&nbsp;myExportComponent.BeginExport();<br />
+    }</p>
+    <p>...</p>
+    <p>&lt;input type='button' onClick=&quot;javascript:initiateExport();&quot; value=&quot;Begin batch export&quot; /&gt;</p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>The final code of the page looks as under: </p></td>
+  </tr>
+  
+  <tr>
+    <td valign="top" class="codeBlock"><p>&lt;html&gt;<br />
+      &lt;head&gt;<br />
+      &nbsp;&nbsp;&lt;script language=&quot;JavaScript&quot; src=&quot;../../../JSClass/FusionMaps.js&quot;&gt;&lt;/script&gt;<br />
+      &nbsp;&nbsp;&lt;script language=&quot;JavaScript&quot; src=&quot;../../../JSClass/FusionMapsExportComponent.js&quot;&gt;&lt;/script&gt;<br />
+      &nbsp;&nbsp;&lt;script type=&quot;text/javascript&quot;&gt; <br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="codeComment">//Define a function, which will be invoked when user clicks the batch-export-initiate button</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;function initiateExport(){<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;myExportComponent.BeginExport();<br />
+&nbsp;&nbsp;&nbsp;&nbsp;}<br />
+&nbsp;&nbsp;&lt;/script&gt;<br />
+&lt;/head&gt;<br />
+&lt;body bgcolor=&quot;#ffffff&quot;&gt;<br />
+&nbsp;&nbsp;&lt;div id=&quot;map1div&quot; align=&quot;center&quot;&gt;The map will appear within this DIV. This text will be replaced by the map.&lt;/div&gt;<br />
+&nbsp;&nbsp;&lt;script type=&quot;text/javascript&quot;&gt;<br />
+&nbsp;&nbsp;&nbsp;<span class="codeComment">&nbsp;//Build the map. Make sure to have registerWithJS as 1</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;var myMap1 = new FusionMaps(&quot;../../../Maps/FCMap_World.swf&quot;, &quot;myMapId1&quot;, &quot;500&quot;, &quot;266&quot;, &quot;0&quot;, &quot;1&quot;);<br />
+&nbsp;&nbsp;&nbsp;&nbsp;myMap1.setDataURL(&quot;SimpleExample.xml&quot;);<br />
+&nbsp;&nbsp;&nbsp;&nbsp;myMap1.render(&quot;map1div&quot;);<br />
+&nbsp;&nbsp;&lt;/script&gt;<br />
+&nbsp;&nbsp;&lt;div id=&quot;map2div&quot; align=&quot;center&quot;&gt;The map will appear within this DIV. This text will be replaced by the map.&lt;/div&gt;<br />
+&nbsp;&nbsp;&lt;script type=&quot;text/javascript&quot;&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="codeComment">//Build the map. Make sure to have registerWithJS as 1</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;var myMap2 = new FusionMaps(&quot;../../../Maps/FCMap_USA.swf&quot;, &quot;myMapId2&quot;, &quot;500&quot;, &quot;266&quot;, &quot;0&quot;, &quot;1&quot;);<br />
+&nbsp;&nbsp;&nbsp;&nbsp;myMap2.setDataURL(&quot;SimpleExample.xml&quot;);<br />
+&nbsp;&nbsp;&nbsp;&nbsp;myMap2.render(&quot;map2div&quot;);<br />
+&nbsp;&nbsp;&lt;/script&gt;<br />
+&nbsp;&nbsp;&lt;div id=&quot;map3div&quot; align=&quot;center&quot;&gt;The map will appear within this DIV. This text will be replaced by the map.&lt;/div&gt;<br />
+&nbsp;&nbsp;&lt;script type=&quot;text/javascript&quot;&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="codeComment">//Build the map. Make sure to have registerWithJS as 1</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;var myMap3 = new FusionMaps(&quot;../../../Maps/FCMap_World.swf&quot;, &quot;myMapId3&quot;, &quot;500&quot;, &quot;266&quot;, &quot;0&quot;, &quot;1&quot;);<br />
+&nbsp;&nbsp;&nbsp;&nbsp;myMap3.setDataURL(&quot;SimpleExample.xml&quot;);<br />
+&nbsp;&nbsp;&nbsp;&nbsp;myMap3.render(&quot;map3div&quot;);<br />
+&nbsp;&nbsp;&lt;/script&gt;<br />
+<br />
+&nbsp;&nbsp;&lt;input type='button' onClick=&quot;javascript:initiateExport();&quot; value=&quot;Begin batch export&quot; /&gt;<br />
+<br />
+&nbsp;&nbsp;<span class="codeComment">&lt;!-- We also create a DIV to contain the FusionMaps batch exporter component --&gt;</span><br />
+&nbsp;&nbsp;&lt;div id=&quot;fcexpDiv&quot; align=&quot;center&quot;&gt;FusionMaps Export Handler Component&lt;/div&gt;&lt;/td&gt;<br />
+&nbsp;&nbsp;&lt;script type=&quot;text/javascript&quot;&gt;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="codeComment">//Initialize Batch Exporter with DOM Id as fcBatchExporter</span><br />
+&nbsp;&nbsp;&nbsp;&nbsp;var myExportComponent = new FusionMapsExportObject(&quot;fcBatchExporter&quot;, &quot;../../../Maps/FCExporter.swf&quot;); <br />
+<br />
+&nbsp;&nbsp;&nbsp;<span class="codeComment">//Add the maps to queue. The maps are referred to by their DOM Id.</span><br />
+&nbsp;&nbsp;myExportComponent.sourceMaps = ['myMapId1','myMapId2','myMapId3'];<br />
+<br />
+&nbsp;&nbsp;<span class="codeComment">//------ Export Component Attributes ------//<br />
+&nbsp;&nbsp;//Set the mode as full mode</span><br />
+&nbsp;&nbsp;myExportComponent.componentAttributes.fullMode='1';<br />
+&nbsp;&nbsp;<span class="codeComment">//Set saving mode as both. This allows users to download individual maps/ as well as download all maps as a single file.</span><br />
+&nbsp;&nbsp;myExportComponent.componentAttributes.saveMode='both';<br />
+&nbsp;&nbsp;<span class="codeComment">//Show allowed export format drop-down</span><br />
+&nbsp;&nbsp;myExportComponent.componentAttributes.showAllowedTypes = '1';<br />
+&nbsp;<span class="codeComment">&nbsp;//Cosmetics <br />
+&nbsp;&nbsp;//Width and height</span><br />
+&nbsp;&nbsp;myExportComponent.componentAttributes.width = '350';<br />
+&nbsp;&nbsp;myExportComponent.componentAttributes.height = '140';<br />
+&nbsp;&nbsp;<span class="codeComment">//Message - caption of export component</span><br />
+&nbsp;&nbsp;myExportComponent.componentAttributes.showMessage = '1';<br />
+&nbsp;&nbsp;myExportComponent.componentAttributes.message = 'Click on button above to begin export of maps. Then save from here.';<br />
+&nbsp;&nbsp;<span class="codeComment">//Render the exporter SWF in our DIV fcexpDiv</span><br />
+&nbsp;&nbsp;myExportComponent.Render(&quot;fcexpDiv&quot;); <br />
+&lt;/script&gt;<br />
+&lt;/body&gt;<br />
+&lt;/html&gt;<br />
+<br />
+      </p>    </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">When you now fire up your HTML page, you'll see a screen as under. As you can see, the batch export component is present along with the maps, waiting for the user to initiate batch process. </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><img src="Images/ECBatchSetup1.jpg" width="605" height="325" /></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">Once the button is clicked, all maps enter capture phase as shown below: </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><img src="Images/ECBatchSetup2.jpg" width="605" height="326" /></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">Finally, when the maps have been exported to Export Component, it gets populated, as under. The maps exported can either be individually saved from this, or all maps can be saved as a single file (by clicking on <span class="codeInline">Save All</span>) button. </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><img src="Images/ECBatchSetup3.jpg" width="356" height="196" /></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text"><p>If you do not wish to allow export of all the maps as a single file, you can just set:</p>
+    <p class="codeInline">&nbsp;&nbsp;&nbsp;&nbsp;myExportComponent.componentAttributes.saveMode='individual'; </p>
+    <p>Or, if you do not want the user to be able to save individual files, you can set this to:</p>
+    <p class="codeInline">&nbsp;&nbsp;&nbsp;&nbsp;myExportComponent.componentAttributes.saveMode='batch';</p>    
+    <p>You would then no longer be able to save individual maps. All the map export output get compiled in a single file, for which you can choose a saving format. </p>
+    <p>In batch mode, the output file name is named as <span class="codeInline">FusionCharts</span> by default (extension depending on what format the user selected).  To specify your own file name, you can set the following in JavaScript. </p>
+    <p class="codeInline"> myExportComponent.componentAttributes.defaultExportFileName = 'MyMaps';</p>
+    <p>The <span class="codeInline">exportFileName</span> attribute would NOT work in batch export, as that file name is map specific. The above line collectively specifies a name for all the maps in the batch - when exported as a single file in batch mode. </p>
+    <p>Similarly, if you want to specify a default export format (JPG, PNG or PDF), and hide the combo box (to select formats), you can set:</p>
+    <p class="codeInline">myExportComponent.componentAttributes.defaultExportFormat='PDF';<br />
+    myExportComponent.componentAttributes.showAllowedTypes='0';</p>    <p>This results in a single button being shown, which when clicked downloads a single PDF file containing all the maps in batch. </p></td>
+  </tr>
+  
+  <tr>
+    <td valign="top" class="header"><img src="Images/ECBatchSetup6.gif" width="180" height="109" border="1" /></td>
+  </tr>
+  <tr>
+    <td valign="top" class="header">&nbsp;</td>
+  </tr>
+  <tr>
+    <td valign="top" class="header">Customizing the Export Component UI </td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">The export component offers extensive UI customization options. Here, we'll see some of the basic configuration options. The entire list can be found in the section <span class="codeInline">Component UI Customization</span>. Consider the code below: </td>
+  </tr>
+  <tr>
+    <td valign="top" class="codeBlock"><p><span class="codeComment">&lt;!-- We also create a DIV to contain the FusionMaps client-side exporter component --&gt;</span><br />
+  &lt;div id=&quot;fcexpDiv&quot; align=&quot;center&quot;&gt;FusionMaps Export Handler Component&lt;/div&gt;<br />
+  &lt;script type=&quot;text/javascript&quot;&gt;<br />
+  <span class="codeComment"> &nbsp;&nbsp;&nbsp;//Render the export component in this<br />
+  &nbsp;&nbsp;&nbsp;//Note: fcExporter1 is the DOM ID of the DIV and should be specified as value of exportHandler<br />
+  &nbsp;&nbsp;&nbsp;//attribute of map XML.<br />
+  </span><span class="codeComment">&nbsp;&nbsp;&nbsp;</span>var myExportComponent = new FusionMapsExportObject(&quot;fcExporter1&quot;, &quot;../../FusionMaps/FCExporter.swf&quot;);</p>
+      <p><span class="codeComment">&nbsp;&nbsp;&nbsp;</span><span class="codeComment">//Add the maps to queue. The maps are referred to by their DOM Id.</span><br />
+  &nbsp;&nbsp;&nbsp;&nbsp;myExportComponent.sourceMaps = ['myMapId1','myMapId2','myMapId3'];<br />
+        <br />
+  &nbsp;<span class="codeComment">&nbsp;&nbsp;&nbsp;//------ Export Component Attributes ------//<br />
+    &nbsp;&nbsp;&nbsp;&nbsp;//Set the mode as full mode<br />
+    &nbsp;</span>&nbsp;&nbsp;&nbsp;myExportComponent.componentAttributes.fullMode='1';<br />
+  &nbsp;<span class="codeComment">&nbsp;&nbsp;&nbsp;//Set saving mode as both. This allows users to download individual maps/ as well as download all maps as a single file.</span><br />
+  &nbsp;&nbsp;&nbsp;&nbsp;myExportComponent.componentAttributes.saveMode='both';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;&nbsp;//Show allowed export format drop-down</span><br />
+  &nbsp;&nbsp;&nbsp;&nbsp;myExportComponent.componentAttributes.showAllowedTypes = '1';<br />
+        <br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;//Customize the component properties <br />
+        &nbsp;&nbsp;&nbsp;//Width and height<br />
+        </span><span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.width = '400';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.height = '120';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;//Background color</span><br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.bgColor = 'ffffdd';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;//Border properties</span><br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.borderThickness = '2';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.borderColor = '0372AB';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;//Font properties</span><br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.fontFace = 'Arial';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.fontColor = '0372AB';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.fontSize = '12';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;//Message - caption of export component</span><br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.showMessage = '1';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.message = 'Export the map first, and then click on this button to save';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;//Button visual configuration</span><br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.btnWidth = '200';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.btnHeight= '25';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.btnColor = 'E1f5ff';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.btnBorderColor = '0372AB';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;//Button font properties</span><br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.btnFontFace = 'Verdana';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.btnFontColor = '0372AB';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.btnFontSize = '15';<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;//Title of button</span><br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.btnSaveTitle = 'Save this map'<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.btnSaveAllTitle = 'Save all maps together'<br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.componentAttributes.btnDisabledTitle = 'Waiting for export'; <br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;//Render the exporter SWF in our DIV fcexpDiv</span><br />
+        <span class="codeComment">&nbsp;&nbsp;&nbsp;</span>myExportComponent.Render(&quot;fcexpDiv&quot;);<br />
+  &lt;/script&gt;</p></td>
+  </tr>
+  <tr>
+    <td valign="top" class="text">In this example, we've customized font properties, color properties and titles. You can also customize scroll bar properties, combo-box properties, padding and margins. Refer to the section <span class="codeInline">Client-side Exporting &gt; Component UI Customization</span> to get an idea of the same. </td>
+  </tr>
+</table>
+</body>
+</html>

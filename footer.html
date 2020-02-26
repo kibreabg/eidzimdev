@@ -1,0 +1,512 @@
+/**
+
+LAB TURN AROUN  TIMES FUCNTIONS
+
+
+**/
+//get turn around time from receipt at lab to processing FOR particular year and/or month only repeats
+function GetCollectiontoReceivedatLabTAT($lab,$month,$year,$startdate,$enddate)
+{
+$incompletedate="0000-00-00";
+
+if ($month ==0) // year ONLY
+{
+	$strQuery=mysql_query("select  samples.datecollected,samples.datereceived From samples WHERE  samples.lab='$lab'  AND  
+samples.datereceived !='0000-00-00' AND samples.datecollected !='0000-00-00' AND samples.datecollected <= samples.datereceived AND YEAR(samples.datereceived)='$year' AND YEAR(samples.datecollected)='$year' AND samples.repeatt=0 AND samples.Flag=1")or die(mysql_error());
+		$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+		while(list($datecollected,$datereceived) = mysql_fetch_array($strQuery))
+		{
+	  
+		$sdrec=date("d-m-Y",strtotime($datereceived));
+		$sdoc=date("d-m-Y",strtotime($datecollected));
+		$workingdays=getWorkingDays($sdoc,$sdrec,$holidays) ;
+		$totalholidays=0;
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+		}
+	
+		$ave=round(($sumdates/$numsamples),1);
+   }
+else
+{
+	$ave=0;
+}
+	
+	return array($numsamples, $ave); 
+
+}
+else if ($month > 0) // MONTH AND  year ONLY
+{
+	
+	$strQuery=mysql_query("select  samples.datereceived,samples.datecollected From samples WHERE  samples.lab='$lab'  AND  
+((samples.datereceived !='0000-00-00') AND (samples.datecollected !='0000-00-00')) AND samples.datecollected <= samples.datereceived   AND YEAR(samples.datereceived)='$year'  AND YEAR(samples.datecollected)='$year' AND 
+MONTH(samples.datereceived)='$month' AND 
+MONTH(samples.datecollected)='$month' AND samples.repeatt=0 AND samples.Flag=1")or die(mysql_error());
+	$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+		while(list($datereceived,$datecollected) = mysql_fetch_array($strQuery))
+		{
+	  
+		$sdrec=date("d-m-Y",strtotime($datereceived));
+		$sdoc=date("d-m-Y",strtotime($datecollected));
+		$workingdays=getWorkingDays($sdoc,$sdrec,$holidays) ;
+		$totalholidays=0;
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+		}
+	$ave=round(($sumdates/$numsamples),1);
+  }
+	else
+  {
+	$ave=0;
+   }
+	
+	return array($numsamples, $ave); 
+
+	
+}
+else //START N END DATE
+{
+
+$strQuery=mysql_query("select  samples.datereceived,samples.datecollected From samples WHERE  samples.lab='$lab'  AND samples.datereceived BETWEEN '$startdate' AND '$enddate' AND samples.datecollected BETWEEN '$startdate' AND '$enddate' AND samples.repeatt=0 AND samples.Flag=1")or die(mysql_error());
+		$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+		while(list($datereceived,$datecollected) = mysql_fetch_array($strQuery))
+		{
+	  
+		$sdrec=date("d-m-Y",strtotime($datereceived));
+		$sdoc=date("d-m-Y",strtotime($datecollected));
+		$workingdays=getWorkingDays($sdoc,$sdrec,$holidays) ;
+		$totalholidays=0;
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+		}
+	
+		$ave=round(($sumdates/$numsamples),1);
+   }
+else
+{
+	$ave=0;
+}
+	
+	return array($numsamples, $ave); 
+
+
+}
+}
+
+
+
+function GetReceivedatLabtoProcessingLABTAT($lab,$month,$year,$startdate,$enddate)
+{
+$incompletedate="0000-00-00";
+
+if ($month ==0) // year ONLY
+{
+	$strQuery=mysql_query("select  samples.datereceived,samples.datetested From samples WHERE  samples.lab='$lab'  AND  
+samples.datereceived !='0000-00-00' AND samples.datetested !='0000-00-00' AND samples.datereceived <= samples.datetested AND YEAR(samples.datereceived)='$year' AND YEAR(samples.datetested)='$year' AND samples.repeatt=0 AND samples.Flag=1")or die(mysql_error());
+		$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+		while(list($datereceived,$datetested) = mysql_fetch_array($strQuery))
+		{
+	  
+		$sdrec=date("d-m-Y",strtotime($datereceived));
+		$sdis=date("d-m-Y",strtotime($datetested));
+		$workingdays=getWorkingDays($sdrec,$sdis,$holidays) ;
+		//$totalholidays=getTotalHolidaysinMonth($month);
+
+
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+		}
+	
+		$ave=round(($sumdates/$numsamples),1);
+   }
+else
+{
+	$ave=0;
+}
+	
+	return array($numsamples, $ave); 
+
+}
+else if ($month > 0) // MONTH AND  year ONLY
+{
+	
+	$strQuery=mysql_query("select  samples.datereceived,samples.datetested From samples WHERE  samples.lab='$lab'  AND  
+((samples.datereceived !='0000-00-00') AND (samples.datetested !='0000-00-00')) AND samples.datereceived <= samples.datetested   AND YEAR(samples.datereceived)='$year'  AND YEAR(samples.datetested)='$year' AND 
+MONTH(samples.datereceived)='$month' AND 
+MONTH(samples.datetested)='$month' AND samples.repeatt=0 AND samples.Flag=1")or die(mysql_error());
+	$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+		while(list($datereceived,$datetested) = mysql_fetch_array($strQuery))
+		{
+	  
+		$sdrec=date("d-m-Y",strtotime($datereceived));
+		$sdis=date("d-m-Y",strtotime($datetested));
+		$workingdays=getWorkingDays($sdrec,$sdis,$holidays) ;
+		//$totalholidays=getTotalHolidaysinMonth($month);
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+
+		
+
+		}
+	$ave=round(($sumdates/$numsamples),1);
+  }
+	else
+  {
+	$ave=0;
+   }
+	
+	return array($numsamples, $ave); 
+
+	
+}
+else //START N END DATE
+{
+
+$strQuery=mysql_query("select  samples.datereceived,samples.datetested From samples WHERE  samples.lab='$lab'  AND samples.datereceived BETWEEN '$startdate' AND '$enddate' AND samples.datetested BETWEEN '$startdate' AND '$enddate' AND samples.repeatt=0 AND samples.Flag=1")or die(mysql_error());
+		$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+		while(list($datereceived,$datetested) = mysql_fetch_array($strQuery))
+		{
+	  
+		$sdrec=date("d-m-Y",strtotime($datereceived));
+		$sdis=date("d-m-Y",strtotime($datetested));
+		$workingdays=getWorkingDays($sdrec,$sdis,$holidays) ;
+		$totalholidays=0;
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+		}
+	
+		$ave=round(($sumdates/$numsamples),1);
+   }
+else
+{
+	$ave=0;
+}
+	
+	return array($numsamples, $ave); 
+
+
+}
+}
+
+//get turn around time from receipt at lab to dispatch FOR particular year and/or month only repeats
+function GetProcessedatLabtoDispatchLABTAT($lab,$month,$year,$startdate,$enddate)
+{
+$incompletedate="0000-00-00";
+if ($month ==0)
+{
+
+	
+	$strQuery=mysql_query("select  samples.datetested,samples.datedispatched From samples WHERE  samples.lab='$lab'  AND  
+samples.datetested !='0000-00-00' AND samples.datedispatched !=''  AND samples.datetested <= samples.datedispatched  AND YEAR(samples.datetested)='$year' AND YEAR(samples.datedispatched)='$year' AND samples.repeatt=0 AND samples.Flag=1")or die(mysql_error());
+		$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+		while(list($datetested,$datedispatched) = mysql_fetch_array($strQuery))
+	{
+	  
+		$sdrec=date("d-m-Y",strtotime($datetested));
+		$sdis=date("d-m-Y",strtotime($datedispatched));
+		$workingdays=getWorkingDays($sdrec,$sdis,$holidays) ;
+		//$totalholidays=getTotalHolidaysinMonth($month);
+
+
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+
+		
+
+	}
+	
+	$ave=round(($sumdates/$numsamples),1);
+}
+else
+{
+	$ave=0;
+}
+	
+	return array($numsamples, $ave); 
+
+	
+	
+}
+else if ($month > 0)
+{
+	
+	$strQuery=mysql_query("select  samples.datetested,samples.datedispatched From samples WHERE  samples.lab='$lab'  AND  
+((samples.datetested !='0000-00-00') AND (samples.datedispatched !=''))  AND samples.datetested <= samples.datedispatched  AND YEAR(samples.datetested)='$year'  AND YEAR(samples.datedispatched)='$year' AND 
+MONTH(samples.datetested)='$month' AND 
+MONTH(samples.datedispatched)='$month' AND samples.repeatt=0 AND samples.Flag=1")or die(mysql_error());
+	$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+		while(list($datetested,$datedispatched) = mysql_fetch_array($strQuery))
+	{
+	  
+		$sdrec=date("d-m-Y",strtotime($datetested));
+		$sdis=date("d-m-Y",strtotime($datedispatched));
+		$workingdays=getWorkingDays($sdrec,$sdis,$holidays) ;
+		//$totalholidays=getTotalHolidaysinMonth($month);
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+
+		
+
+	}
+	$ave=round(($sumdates/$numsamples),1);
+}
+else
+{
+	$ave=0;
+}
+	
+	return array($numsamples, $ave); 
+
+	
+}
+else 
+{
+
+
+	$strQuery=mysql_query("select  samples.datetested,samples.datedispatched From samples WHERE  samples.lab='$lab'  AND samples.datetested BETWEEN '$startdate' AND '$enddate' AND samples.datedispatched BETWEEN '$startdate' AND '$enddate' AND samples.repeatt=0 AND samples.Flag=1")or die(mysql_error());
+		$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+		while(list($datetested,$datedispatched) = mysql_fetch_array($strQuery))
+	{
+	  
+		$sdrec=date("d-m-Y",strtotime($datetested));
+		$sdis=date("d-m-Y",strtotime($datedispatched));
+		$workingdays=getWorkingDays($sdrec,$sdis,$holidays) ;
+		$totalholidays=0;
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+
+		
+
+	}
+	
+	$ave=round(($sumdates/$numsamples),1);
+}
+else
+{
+	$ave=0;
+}
+	
+	return array($numsamples, $ave); 
+
+}
+}
+
+//get turn around time from receipt at lab to dispatch FOR particular year and/or month only repeats
+function GetReceivedtoDispatchLABTAT($lab,$month,$year,$startdate,$enddate)
+{
+$incompletedate="0000-00-00";
+
+ if ($month ==0)
+{
+		
+		$strQuery=mysql_query("select  samples.datereceived,samples.datedispatched From samples WHERE  samples.lab='$lab'  AND  samples.datereceived !='0000-00-00' AND samples.datedispatched  !='' AND samples.datereceived <= samples.datedispatched  AND YEAR(samples.datereceived)='$year' AND YEAR(samples.datedispatched)='$year' AND samples.repeatt=0 AND samples.Flag=1 ")or die(mysql_error());
+	$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+	while(list($datereceived,$datedispatched) = mysql_fetch_array($strQuery))
+	{
+		
+		$sdoc=date("d-m-Y",strtotime($datereceived));
+		$sdis=date("d-m-Y",strtotime($datedispatched));
+		$workingdays=getWorkingDays($sdoc,$sdis,$holidays) ;
+		//$totalholidays=getTotalHolidaysinMonth($month);
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+	}
+	
+	$ave=round(($sumdates/$numsamples),1);
+}
+else
+{
+	$ave=0;
+}
+	
+	return array($numsamples, $ave); 
+
+}
+else if ($month > 0)
+{
+	
+	$strQuery=mysql_query("select  samples.datereceived,samples.datedispatched From samples WHERE  samples.lab='$lab'  AND  (samples.datereceived !='0000-00-00' AND  samples.datedispatched  !='') AND samples.datereceived <= samples.datedispatched  AND YEAR(samples.datereceived)='$year' AND YEAR(samples.datedispatched)='$year' AND MONTH(samples.datereceived)='$month' AND MONTH(samples.datedispatched)='$month'   AND samples.repeatt=0 AND samples.Flag=1")or die(mysql_error());
+	$resultarray=mysql_fetch_array($strQuery);
+	$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+		while(list($datereceived,$datedispatched) = mysql_fetch_array($strQuery))
+	{
+		
+		$sdoc=date("d-m-Y",strtotime($datereceived));
+		$sdis=date("d-m-Y",strtotime($datedispatched));
+		$workingdays=getWorkingDays($sdoc,$sdis,$holidays) ;
+		//$totalholidays=getTotalHolidaysinMonth($month);
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+	}
+	
+	$ave=round(($sumdates/$numsamples),1);
+	
+	}
+	else
+	{
+		$ave=0;
+	}
+	
+		return array($numsamples, $ave); 
+	
+}
+else 
+{
+$strQuery=mysql_query("select  samples.datereceived,samples.datedispatched From samples WHERE  samples.lab='$lab' AND samples.datereceived BETWEEN '$startdate' AND '$enddate' AND samples.datedispatched BETWEEN '$startdate' AND '$enddate' AND samples.repeatt=0 AND samples.Flag=1 ")or die(mysql_error());
+	$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+	while(list($datereceived,$datedispatched) = mysql_fetch_array($strQuery))
+	{
+		
+		$sdoc=date("d-m-Y",strtotime($datereceived));
+		$sdis=date("d-m-Y",strtotime($datedispatched));
+		$workingdays=getWorkingDays($sdoc,$sdis,$holidays) ;
+		$totalholidays=0;
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+	}
+	
+	$ave=round(($sumdates/$numsamples),1);
+}
+else
+{
+	$ave=0;
+}
+	
+	return array($numsamples, $ave); 
+
+}
+
+}
+
+
+//get turn around time from receipt at lab to dispatch FOR particular year and/or month only repeats
+function GetCollectiontoDispatchLABTAT($lab,$month,$year,$startdate,$enddate)
+{
+$incompletedate="0000-00-00";
+
+ if ($month ==0)
+{
+		
+		$strQuery=mysql_query("select  samples.datecollected,samples.datedispatched From samples WHERE  samples.lab='$lab'  AND  samples.datecollected !='0000-00-00' AND samples.datedispatched  !='' AND samples.datecollected <= samples.datedispatched  AND YEAR(samples.datecollected)='$year' AND YEAR(samples.datedispatched)='$year' AND samples.repeatt=0 AND samples.Flag=1 ")or die(mysql_error());
+	$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+	while(list($datecollected,$datedispatched) = mysql_fetch_array($strQuery))
+	{
+		
+		$sdoc=date("d-m-Y",strtotime($datecollected));
+		$sdis=date("d-m-Y",strtotime($datedispatched));
+		$workingdays=getWorkingDays($sdoc,$sdis,$holidays) ;
+		//$totalholidays=getTotalHolidaysinMonth($month);
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+	}
+	
+	$ave=round(($sumdates/$numsamples),1);
+}
+else
+{
+	$ave=0;
+}
+	
+	return array($numsamples, $ave); 
+
+}
+else if ($month > 0)
+{
+	
+	$strQuery=mysql_query("select  samples.datecollected,samples.datedispatched From samples WHERE  samples.lab='$lab'  AND  (samples.datecollected !='0000-00-00' AND  samples.datedispatched  !='') AND samples.datecollected <= samples.datedispatched  AND YEAR(samples.datecollected)='$year' AND YEAR(samples.datedispatched)='$year' AND MONTH(samples.datecollected)='$month' AND MONTH(samples.datedispatched)='$month'   AND samples.repeatt=0 AND samples.Flag=1")or die(mysql_error());
+	$resultarray=mysql_fetch_array($strQuery);
+	$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+		while(list($datecollected,$datedispatched) = mysql_fetch_array($strQuery))
+	{
+		
+		$sdoc=date("d-m-Y",strtotime($datecollected));
+		$sdis=date("d-m-Y",strtotime($datedispatched));
+		$workingdays=getWorkingDays($sdoc,$sdis,$holidays) ;
+		//$totalholidays=getTotalHolidaysinMonth($month);
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+	}
+	
+	$ave=round(($sumdates/$numsamples),1);
+	
+	}
+	else
+	{
+		$ave=0;
+	}
+	
+		return array($numsamples, $ave); 
+	
+}
+else 
+{
+$strQuery=mysql_query("select  samples.datecollected,samples.datedispatched From samples WHERE  samples.lab='$lab' AND samples.datecollected BETWEEN '$startdate' AND '$enddate' AND samples.datedispatched BETWEEN '$startdate' AND '$enddate' AND samples.repeatt=0 AND samples.Flag=1 ")or die(mysql_error());
+	$numsamples=mysql_num_rows($strQuery);  //no of samples with complete dae collcted and date received 
+	$sumdates=0;
+	if ($numsamples !=0)
+	{
+	while(list($datecollected,$datedispatched) = mysql_fetch_array($strQuery))
+	{
+		
+		$sdoc=date("d-m-Y",strtotime($datecollected));
+		$sdis=date("d-m-Y",strtotime($datedispatched));
+		$workingdays=getWorkingDays($sdoc,$sdis,$holidays) ;
+		$totalholidays=0;
+		$totaldays =$workingdays -$totalholidays ;
+		$sumdates=$sumdates+$totaldays;
+	}
+	
+	$ave=round(($sumdates/$numsamples),1);
+}
+else
+{
+	$ave=0;
+}
+	
+	return array($numsamples, $ave); 
+
+}
+
+}

@@ -1,0 +1,6 @@
+<chart palette='2' caption=''  showValues='0' decimals='0' formatNumberScale='0' useRoundEdges='1' showBorder="0"  bgColor='FFFFFF' >
+<set label='SdNVP' value='6'  />
+<set label='SdNVP AZT' value='78' />
+<set label='nvp' value='34'  />
+<set label='Extended NVP' value='97' />
+</chart>

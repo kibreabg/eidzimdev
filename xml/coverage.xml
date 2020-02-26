@@ -1,0 +1,6 @@
+<chart lowerLimit='0' bgColor='#FFFFFF' showBorder='0' tickValueDistance='25'upperLimit='100' lowerLimitDisplay='0%' upperLimitDisplay='100%' gaugeStartAngle='180' gaugeEndAngle='0' palette='3' numberSuffix='%' tickValueDistance='20' showValue='1'>
+<colorRange>
+<color minValue='0' maxValue='25' code='FF654F'/>
+<color minValue='25' maxValue='60' code='F6BD0F'/>
+<color minValue='60' maxValue='100' code='8BBA00'/>
+</colorRange><dials><dial value='76'  rearExtension='10' baseWidth='4' /></dials></chart>
