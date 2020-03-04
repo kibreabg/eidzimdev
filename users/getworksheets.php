@@ -7,8 +7,7 @@ if (!$q) {
     return;
 }
 
-$sql = "SELECT worksheets.worksheetno, worksheets.ID FROM worksheets
-					WHERE (worksheets.ID LIKE '%$q%' OR worksheets.worksheetno LIKE '%$q%') AND worksheets.lab='$labss' ";
+$sql = "SELECT worksheets.worksheetno, worksheets.ID FROM worksheets WHERE (worksheets.ID LIKE '%$q%' OR worksheets.worksheetno LIKE '%$q%')";
 $rsd = mysql_query($sql) or die(mysql_error());
 while ($rs = mysql_fetch_array($rsd)) {
     $cid = $rs['ID'];
