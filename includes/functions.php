@@ -289,14 +289,15 @@ function GetZSavedSamples($lastpatientid, $labss, $BatchNo, $pid, $fcode, $srecs
     return $success;
 }
 
-function SaveSampleWithResult($lastpatientid, $labss, $BatchNo, $pid, $fcode, $srecstatus, $sspot, $sdoc, $datedispatchedd, $sdrec, $scomments, $labcomment, $parentid, $rejectedreason, $repeatreason, $result, $testreason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $rej, $priority, $bloodspot, $failedBrotherID) {
+function SaveSampleWithResult($lastpatientid, $labss, $BatchNo, $pid, $fcode, $srecstatus, $sspot, $sdoc, $datedispatchedd, $sdrec, $scomments, $labcomment, $parentid, $rejectedreason, $repeatreason, $result, $testreason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID)
+{
     if ($parentid == "") {
         $parentid = 0;
     }
     $blank = "";
     $child = "INSERT INTO samples
-    (patientid,lab,batchno, patient, facility, receivedstatus, spots, datecollected, datedispatchedfromfacility, datereceived, comments, labcomment,parentid,rejectedreason,reason_for_repeat,datetested,worksheet,result,datemodified,datedispatched,fcode,Inworksheet,BatchComplete,DispatchComments,Flag,repeatt,sampleokforretest,test_reason,othertest,dateenteredindb,loggedinby,nmrlstampno,approved,priority,bloodspot,failedBrotherId)
-    VALUES('$lastpatientid','$labss','$BatchNo', '$pid', '$fcode', '$srecstatus', '$sspot', '$sdoc', '$datedispatchedd', '$sdrec', '$scomments', '$labcomment', '$parentid', '$rejectedreason', '$repeatreason', '$blank', '$blank', '$result', '$blank', '$blank', '$blank', '$blank','$blank','$blank',1,'$blank','$blank','$testreason','$othertest','$dateenteredindb','$loggedinby','$nmrlstampno','$rej','$priority','$bloodspot','$failedBrotherID')"; //
+    (patientid,lab,batchno, patient, facility, receivedstatus, spots, datecollected, datedispatchedfromfacility, datereceived, comments, labcomment,parentid,rejectedreason,reason_for_repeat,datetested,worksheet,result,datemodified,datedispatched,fcode,Inworksheet,BatchComplete,DispatchComments,Flag,repeatt,sampleokforretest,test_reason,othertest,dateenteredindb,loggedinby,nmrlstampno,bloodspot,failedBrotherID)
+    VALUES('$lastpatientid','$labss','$BatchNo', '$pid', '$fcode', '$srecstatus', '$sspot', '$sdoc', '$datedispatchedd', '$sdrec', '$scomments', '$labcomment', '$parentid', '$rejectedreason', '$repeatreason', '$blank', '$blank', '$result', '$blank', '$blank', '$blank', '$blank','$blank','$blank',1,'$blank','$blank','$testreason','$othertest','$dateenteredindb','$loggedinby','$nmrlstampno','$bloodspot','$failedBrotherID')"; //
     $success = mysql_query($child) or die(mysql_error());
     return $success;
 }
@@ -990,9 +991,7 @@ function getRepeatValue($paroid, $lab)
 //get the labcode parent id
 function getParentID($labid, $lab)
 {
-    $parentquery = mysql_query("SELECT samples.parentid  as 'parentid'
-            FROM samples,facilitys
-            WHERE samples.facility=facilitys.ID AND facilitys.lab='$lab' AND  samples.ID='$labid'");
+    $parentquery = mysql_query("SELECT samples.parentid  as 'parentid' FROM samples,facilitys WHERE samples.facility=facilitys.ID AND facilitys.lab='$lab' AND  samples.ID='$labid'");
     $parentname = mysql_fetch_array($parentquery);
     $parentvalue = $parentname['parentid'];
     return $parentvalue;
@@ -1023,7 +1022,8 @@ function GetDuplicateSampleResultID($paroid, $labcode)
     return $parentvalue;
 }
 
-function GetFailedBrotherID($parentID){
+function GetFailedBrotherID($parentID)
+{
     $query = "SELECT failedBrotherID FROM samples WHERE ID = '$parentID'";
     $runQuery = mysql_query($query);
     $resultSet = mysql_fetch_array($runQuery);
@@ -1472,8 +1472,7 @@ function samplesawaitingtests()
 
 function getsamplesdonebyfacility($facility)
 {
-    $samples = mysql_query("SELECT ID from samples where facility = '$facility' and flag = 1
-					 ") or die(mysql_error());
+    $samples = mysql_query("SELECT ID from samples where facility = '$facility' and flag = 1") or die(mysql_error());
     $samplestest = mysql_num_rows($samples);
 
     return $samplestest;
@@ -1490,6 +1489,24 @@ function GetLastSampleID($lab)
     $samplerec = mysql_fetch_array($getsample);
     $sid = $samplerec['ID'];
     return $sid;
+}
+
+//Gets the bloodspot column value
+function GetBloodSpot($id)
+{
+    $query = "SELECT bloodspot FROM samples WHERE ID='$lab'";
+    $getbloodspot = mysql_query($query);
+    $resultset = mysql_fetch_array($getbloodspot);
+    return $resultset['bloodspot'];
+
+}
+
+function GetMaxBloodSpot($requestno)
+{
+    $query = "SELECT MAX(bloodspot) AS bloodspot FROM samples WHERE patient='$requestno'";
+    $getbloodspot = mysql_query($query);
+    $resultset = mysql_fetch_array($getbloodspot);
+    return $resultset['bloodspot'];
 }
 
 //get requsition no of last saved requisition record

@@ -6,6 +6,8 @@ include '../includes/header.php';
 $success = $_GET['p'];
 if (isset($_GET['wtype'])) {
     $_SESSION['wtype'] = $_GET['wtype']; // Use this line or below line if register_global is off
+} else {
+    $_SESSION['wtype'] = 10;
 }
 $userID = $_SESSION['uid'];
 $searchparameter = ltrim(rtrim($_POST['wsheet'])); //get the search parameter from the userheader and trim the value
@@ -1240,23 +1242,31 @@ $numrows = GettotalPendingworksheets(); //get total no of batches
             $qury = "SELECT ID,worksheetno,datecreated,HIQCAPNo,spekkitno,createdby,Lotno,Rackno,Flag,daterun,datereviewed,type
             FROM worksheets
             WHERE ID='$searchparameterid'
-            AND STR_TO_DATE(datecreated, '%d-%m-%Y') BETWEEN '$fromfilter' AND '$tofilter'
 			ORDER BY ID DESC";
 
             $result = mysql_query($qury) or die(mysql_error()); //for main display
-            $result2 = mysql_query($qury) or die(mysql_error()); //for calculating samples with results and those without
         } else {
 
             $qury = "SELECT ID,worksheetno,datecreated,HIQCAPNo,spekkitno,createdby,Lotno,Rackno,Flag,daterun,datereviewed,type
             FROM worksheets
             WHERE STR_TO_DATE(datecreated, '%d-%m-%Y') BETWEEN '$fromfilter' AND '$tofilter'
 			ORDER BY ID DESC
-			LIMIT $offset, $rowsPerPage";
+            LIMIT $offset, $rowsPerPage";
+
+            $queryNum = "SELECT ID,worksheetno,datecreated,HIQCAPNo,spekkitno,createdby,Lotno,Rackno,Flag,daterun,datereviewed,type
+            FROM worksheets
+            WHERE STR_TO_DATE(datecreated, '%d-%m-%Y') BETWEEN '$fromfilter' AND '$tofilter'
+			ORDER BY ID DESC";
 
             $result = mysql_query($qury) or die(mysql_error()); //for main display
-            $result2 = mysql_query($qury) or die(mysql_error()); //for calculating samples with results and those without
+            $resultNum = mysql_query($queryNum) or die(mysql_error()); //for calculating samples with results and those without
         }
         $no = mysql_num_rows($result);
+        $filterNum = mysql_num_rows($resultNum);
+
+        if ($filterNum != '') {
+            echo "<table><th><div class='notice'>The Batch filter for <strong>" . date("d-M-Y", strtotime($fromfilter)) . " upto " . date("d-M-Y", strtotime($tofilter)) . "</strong> returned <strong>" . $filterNum . " </strong>results</div></th></table>";
+        }
 
         if ($searchparameterid > 0) { //seach worksheets
             ?>
@@ -1265,8 +1275,7 @@ $numrows = GettotalPendingworksheets(); //get total no of batches
                 <td style="width:auto">
                     <div class="notice">
                         The search for Worksheet with Serial #
-                        <strong><?php echo LTRIM(RTRIM($searchparameterid)); ?></strong>returned
-                        <?php echo $no; ?>results.<br />
+                        <strong><?php echo LTRIM(RTRIM($searchparameterid)); ?></strong> returned <?php echo $no; ?> results.<br />
                     </div>
                 </td>
             </tr>
@@ -1325,8 +1334,7 @@ while (list($ID, $worksheetno, $datecreated, $HIQCAPNo, $spekkitno, $createdby, 
                     <?php echo $ID; ?>
                 </td>
                 <td>
-                    <a href=\ "worksheetDetails.php" . "?ID=$worksheetno" . "\"
-                        title='Click to view  Samples in this batch'>
+                    <a href="worksheetDetails.php?ID=<?php echo $worksheetno; ?>" title="Click to view  Samples in this batch">
                         <?php echo $worksheetno ?>
                     </a>
                 </td>
@@ -1358,51 +1366,56 @@ while (list($ID, $worksheetno, $datecreated, $HIQCAPNo, $spekkitno, $createdby, 
                     <?php echo $d ?>
                 </td>
             </tr>
+            <?php }?>
         </table>
         <br />
         <?php
-$numrows = Gettotalworksheets(); //get total no of batches
-                // how many pages we have when using paging?
-                $maxPage = ceil($numrows / $rowsPerPage);
-
-                // print the link to access each page
-                $self = $_SERVER['PHP_SELF'];
-                $nav = '';
-                for ($page = 1; $page <= $maxPage; $page++) {
-                    if ($page == $pageNum) {
-                        $nav .= " $page "; // no need to create a link to current page
-                    } else {
-                        $nav .= " <a href=\"$self?page=$page&wtype={$_SESSION['wtype']}\">$page</a> ";
-                    }
-                }
-
-                // creating previous and next link
-                // plus the link to go straight to
-                // the first and last page
-
-                if ($pageNum > 1) {
-                    $page = $pageNum - 1;
-                    $prev = " <a href=\"$self?page=$page&wtype={$_SESSION['wtype']}\">[Prev]</a> ";
-
-                    $first = " <a href=\"$self?page=1&wtype={$_SESSION['wtype']}\">[First Page]</a> ";
-                } else {
-                    $prev = '&nbsp;'; // we're on page one, don't print previous link
-                    $first = '&nbsp;'; // nor the first page link
-                }
-
-                if ($pageNum < $maxPage) {
-                    $page = $pageNum + 1;
-                    $next = " <a href=\"$self?page=$page&wtype={$_SESSION['wtype']}\">[Next]</a> ";
-
-                    $last = " <a href=\"$self?page=$maxPage&wtype={$_SESSION['wtype']}\">[Last Page]</a> ";
-                } else {
-                    $next = '&nbsp;'; // we're on the last page, don't print next link
-                    $last = '&nbsp;'; // nor the last page link
-                }
-
-// print the navigation link
-                echo '<center>' . ' Page ' . $first . $prev . $nav . $next . $last . '</center>';
+if ($searchparameterid > 0) {
+                $numrows = $no;
+            } else {
+                $numrows = $filterNum; //Gettotalworksheets(); //get total no of batches
             }
+
+            // how many pages we have when using paging?
+            $maxPage = ceil($numrows / $rowsPerPage);
+
+            // print the link to access each page
+            $self = $_SERVER['PHP_SELF'];
+            $nav = '';
+            for ($page = 1; $page <= $maxPage; $page++) {
+                if ($page == $pageNum) {
+                    $nav .= " $page "; // no need to create a link to current page
+                } else {
+                    $nav .= " <a href=\"$self?page=$page&wtype={$_SESSION['wtype']}\">$page</a> ";
+                }
+            }
+
+            // creating previous and next link
+            // plus the link to go straight to
+            // the first and last page
+
+            if ($pageNum > 1) {
+                $page = $pageNum - 1;
+                $prev = " <a href=\"$self?page=$page&wtype={$_SESSION['wtype']}\">[Prev]</a> ";
+
+                $first = " <a href=\"$self?page=1&wtype={$_SESSION['wtype']}\">[First Page]</a> ";
+            } else {
+                $prev = '&nbsp;'; // we're on page one, don't print previous link
+                $first = '&nbsp;'; // nor the first page link
+            }
+
+            if ($pageNum < $maxPage) {
+                $page = $pageNum + 1;
+                $next = " <a href=\"$self?page=$page&wtype={$_SESSION['wtype']}\">[Next]</a> ";
+
+                $last = " <a href=\"$self?page=$maxPage&wtype={$_SESSION['wtype']}\">[Last Page]</a> ";
+            } else {
+                $next = '&nbsp;'; // we're on the last page, don't print next link
+                $last = '&nbsp;'; // nor the last page link
+            }
+
+            // print the navigation link
+            echo '<center>' . ' Page ' . $first . $prev . $nav . $next . $last . '</center>';
         } else {
             ?>
         <table>

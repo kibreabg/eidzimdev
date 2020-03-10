@@ -47,6 +47,9 @@ if ($_REQUEST['SaveWorksheet']) {
         $testresultID = GetIDfromtableandname($outcome[$a], "results");
         // Repeat samples (The children of the samples to be repeated)
         if ($paroid > 0) {
+            //Update status of worksheet
+            $updateworksheetrec = mysql_query("UPDATE worksheets SET Flag = 1, reviewedby='$userid', datereviewed='$datereviewed'
+                        WHERE ( ((worksheetno = '$waksheetno') AND (ID='$serialno')) )") or die(mysql_error());
             //Determine if sample is repeat or not (Get the result of the parent sample)
             $parentresult = getparentsampleresult($paroid, $labss);
             //Determine if this sample has a brother with a same parent ID
@@ -57,24 +60,18 @@ if ($_REQUEST['SaveWorksheet']) {
             $secondsampeID = GetDuplicateSampleResultID($paroid, $labcode[$a]);
             //Get the blood spot available for test (Max spots are 5)
             $bloodspot = GetBloodSpot($labcode[$a]);
+
             // retest done in duplicates and the 2nd duplicate also has a result
             if (($noofretests == 2) && ($secondduplicateresult > 0)) {
 
                 //Update pending tasks
-                $repeatresults = mysql_query("UPDATE pendingtasks SET status = 1 WHERE (sample='$labcode[$a]' AND task=3)") or die(mysql_error());
-                //Update sample in pending tasks as having a result
-                $withresults = mysql_query("UPDATE pendingtasks SET status = 1 WHERE (sample='$labcode[$a]' AND task=1)") or die(mysql_error());
-                //Update status of worksheet
-                $updateworksheetrec = mysql_query("UPDATE worksheets SET Flag = 1, reviewedby='$userid', datereviewed='$datereviewed'
-			   			   WHERE ( ((worksheetno = '$waksheetno') AND (ID='$serialno')) )") or die(mysql_error());
+                $repeatresults = mysql_query("UPDATE pendingtasks SET status = 1 WHERE sample='$labcode[$a]' AND (task = 3 OR task = 1)") or die(mysql_error());
 
                 if (($testresultID == 1) && ($secondduplicateresult == 1)) {
                     //Both Negative is Final Negative
-
                     $resultsrec = mysql_query("UPDATE samples SET result = 1, repeatt =  0, BatchComplete = 2 WHERE (ID='$labcode[$a]')") or die(mysql_error());
-
                     //Update the other duplicate as non usable sample
-                    $resultsrec2 = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$secondsampeID')") or die(mysql_error());
+                    $resultsrec = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$secondsampeID')") or die(mysql_error());
                 } else if ((($testresultID == 1) && ($secondduplicateresult == 6)) || (($testresultID == 6) && ($secondduplicateresult == 1))
                     || (($testresultID == 2) && ($secondduplicateresult == 6)) || (($testresultID == 6) && ($secondduplicateresult == 2))
                     || (($testresultID == 3) && ($secondduplicateresult == 6)) || (($testresultID == 6) && ($secondduplicateresult == 3))) {
@@ -82,9 +79,9 @@ if ($_REQUEST['SaveWorksheet']) {
 
                     if ($testresultID == 6) {
                         //Make the Failed sample Interim, (Non Reportable, Printable)
-                        $repeatresults = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$labcode[$a]')") or die(mysql_error());
+                        $resultsrec = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$labcode[$a]')") or die(mysql_error());
                         //Update the other duplicate as non usable sample as well
-                        $resultsrec2 = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$secondsampeID')") or die(mysql_error());
+                        $resultsrec = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$secondsampeID')") or die(mysql_error());
 
                         //Get details of the Failed sample to be re saved for re test
                         $repeatsampledetails = getSampleetails($labcode[$a]);
@@ -100,12 +97,12 @@ if ($_REQUEST['SaveWorksheet']) {
                         $lastid = GetLastSampleID($lab);
                         $repeat = SaveRepeatSamplesTask($task, $batchno, $status, $lastid, $lab);
                         //save complete batch
-                        $completeentry = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                        $resultsrec = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
                     } else if ($secondduplicateresult == 6) {
                         //Make the Failed sample Interim, (Non Reportable, Printable)
-                        $repeatresults = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$secondsampeID')") or die(mysql_error());
+                        $resultsrec = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$secondsampeID')") or die(mysql_error());
                         //Update the other duplicate as non usable sample
-                        $resultsrec2 = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$labcode[$a]')") or die(mysql_error());
+                        $resultsrec = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$labcode[$a]')") or die(mysql_error());
                         //Get details of the Failed sample to be re saved for re test
                         //Get details of the Failed sample to be re saved for re test
                         $repeatsampledetails = getSampleetails($secondsampeID);
@@ -121,22 +118,21 @@ if ($_REQUEST['SaveWorksheet']) {
                         $lastid = GetLastSampleID($lab);
                         $repeat = SaveRepeatSamplesTask($task, $batchno, $status, $lastid, $lab);
                         //save complete batch
-                        $completeentry = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                        $resultsrec = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
 
                     }
                 } else if (($testresultID == 2) && ($secondduplicateresult == 2)) {
                     //Both Positive will be final Positive
-                    $resultsrec = mysql_query("UPDATE samples SET result = 2 , repeatt = 0, BatchComplete = 2 WHERE (ID='$labcode[$a]')") or die(mysql_error());
-
+                    $resultsrec = mysql_query("UPDATE samples SET result = 2, repeatt = 0, BatchComplete = 2 WHERE (ID='$labcode[$a]')") or die(mysql_error());
                     //Update the other duplicate as a complete batch because it's of no use now
-                    $resultsrec2 = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$secondsampeID')") or die(mysql_error());
+                    $resultsrec = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$secondsampeID')") or die(mysql_error());
                 } else if ((($testresultID == 2) && ($secondduplicateresult == 3)) || (($testresultID == 3) && ($secondduplicateresult == 2))) {
                     //1 Positive, 1 Indeterminate Final Positive
                     if ($testresultID == 2) {
                         //Final one with positive result gets to be ready for dispatch
                         $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID', repeatt = 0, BatchComplete = 2 WHERE (ID='$labcode[$a]')") or die(mysql_error());
                         //Update the other duplicate as non usable sample
-                        $resultsrec2 = mysql_query("UPDATE samples SET result = '$secondduplicateresult', repeatt = 1, BatchComplete = 0 WHERE (ID='$secondsampeID')") or die(mysql_error());
+                        $resultsrec = mysql_query("UPDATE samples SET result = '$secondduplicateresult', repeatt = 1, BatchComplete = 0 WHERE (ID='$secondsampeID')") or die(mysql_error());
 
                     } elseif ($testresultID == 3) {
                         //Final one with positive result gets to be ready for dispatch
@@ -154,10 +150,14 @@ if ($_REQUEST['SaveWorksheet']) {
                     extract($repeatsampledetails);
                     //Create a mirror sample for one of the samples by giving it a parent ID of this sample and give it a result of 5 (Collect New Sample)
                     $result = 5;
-                    $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
-                    $lastid = GetLastSampleID($lab);
-                    //Save complete batch
-                    $completeentry = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                    $bloodspot = GetMaxBloodSpot($patient) + 1;
+                    
+                    if ($bloodspot < 5) {
+                        $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
+                        $lastid = GetLastSampleID($lab);
+                        //Save complete batch
+                        $resultsrec = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                    }
                 } else if (($testresultID == 3) && ($secondduplicateresult == 3)) {
                     //Both Indeterminate Collect New Sample: (Make both Interim and create a new one and make it Reportable Collect New Sample)
                     $resultsrec = mysql_query("UPDATE samples SET repeatt = 1 , BatchComplete = 0 WHERE (ID='$labcode[$a]')") or die(mysql_error());
@@ -168,10 +168,14 @@ if ($_REQUEST['SaveWorksheet']) {
                     extract($repeatsampledetails);
                     //Create a mirror sample for one of the samples by giving it a parent ID of this sample and give it a result of 5 (Collect New Sample)
                     $result = 5;
-                    $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
-                    $lastid = GetLastSampleID($lab);
-                    //Save complete batch
-                    $completeentry = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                    $bloodspot = GetMaxBloodSpot($patient) + 1;
+
+                    if ($bloodspot < 5) {
+                        $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
+                        $lastid = GetLastSampleID($lab);
+                        //Make the new sample Printable & Reportable
+                        $resultsrec = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                    }
                 } else if ((($testresultID == 1) && ($secondduplicateresult == 3)) || (($testresultID == 3) && ($secondduplicateresult == 1))) {
                     //1 Negative and 1 Indeterminate is Collect New Sample: (Make both Interim and create a new one and make it Reportable Collect New Sample)
                     $resultsrec = mysql_query("UPDATE samples SET repeatt = 1 , BatchComplete = 0 WHERE (ID='$labcode[$a]')") or die(mysql_error());
@@ -182,24 +186,25 @@ if ($_REQUEST['SaveWorksheet']) {
                     extract($repeatsampledetails);
                     //Create a mirror sample for one of the samples by giving it a parent ID of this sample and give it a result of 5 (Collect New Sample)
                     $result = 5;
-                    $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
-                    $lastid = GetLastSampleID($lab);
-                    //Save complete batch
-                    $completeentry = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                    $bloodspot = GetMaxBloodSpot($patient) + 1;
+
+                    if ($bloodspot < 5) {
+                        $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
+                        $lastid = GetLastSampleID($lab);
+                        //Save complete batch
+                        $resultsrec = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                    }
                 }
             } else if (($noofretests == 2) && ($secondduplicateresult == 0)) {
                 //The sample has a brother but the brother doesn't have a result yet
                 //Make this result an Interim & Not Reportable
                 $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID', repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
 
-                //Update status of worksheet
-                $updateworksheetrec = mysql_query("UPDATE worksheets SET Flag = 1, reviewedby='$userid', datereviewed='$datereviewed'
-			   			   WHERE ( ((worksheetno = '$waksheetno') AND (ID='$serialno')) )") or die(mysql_error());
             } else if ($noofretests == 1) {
                 //After repeat is done only in singles (Like as in failed or positive parents)
                 if ($testresultID == 6 && $bloodspot < 5) {
                     //The repeat is again Failed
-                    $repeatresults = mysql_query("UPDATE samples SET result = '$testresultID', repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
+                    $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID', repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
 
                     //Get details of the Failed sample to be re saved for re test
                     $repeatsampledetails = getSampleetails($labcode[$a]);
@@ -207,6 +212,7 @@ if ($_REQUEST['SaveWorksheet']) {
                     //Get the parent ID of the current failed sample
                     $parID = getParentID($labcode[$a], $lab);
                     $failedBrotherID = GetFailedBrotherID($parID);
+                    $result = '';
                     SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
 
                     //Save pending task
@@ -215,11 +221,10 @@ if ($_REQUEST['SaveWorksheet']) {
                     $lastid = GetLastSampleID($lab);
                     $repeat = SaveRepeatSamplesTask($task, $batchno, $status, $lastid, $lab);
                     //save complete batch
-                    $completeentry = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1
-			  			  WHERE (ID = '$lastid')") or die(mysql_error());
+                    $resultsrec = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
                 } else if ($testresultID == 6 && $bloodspot == 5) {
                     //The repeat is again Failed but we've run out of blood spots (MAX = 5)
-                    $repeatresults = mysql_query("UPDATE samples SET result = '$testresultID', repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
+                    $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID', repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
 
                     //Get details of the Failed sample to be re saved for re test
                     $repeatsampledetails = getSampleetails($labcode[$a]);
@@ -236,7 +241,7 @@ if ($_REQUEST['SaveWorksheet']) {
                     $lastid = GetLastSampleID($lab);
                     $repeat = SaveRepeatSamplesTask($task, $batchno, $status, $lastid, $lab);
                     //save complete batch
-                    $completeentry = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                    $resultsrec = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
 
                 } else if ($testresultID == 2) {
                     //Get the failedBrotherID column value for this sample
@@ -247,7 +252,7 @@ if ($_REQUEST['SaveWorksheet']) {
                     //If it came from double duplicate it will have failedBrotherId and the result is determined by comparing it with that result
                     if ($failedBrotherID == 0) {
                         //If the sample is either weak positive or strong positive, final result is Positive (Reportable & Printable)
-                        $completerec = mysql_query("UPDATE samples SET result = '$testresultID', repeatt =  0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
+                        $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID', repeatt =  0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
                     } else if ($failedBrotherID > 0) {
                         $failedBrotherResult = GetSampleResult($failedBrotherID);
                         if ($failedBrotherResult == 'Positive') {
@@ -265,7 +270,7 @@ if ($_REQUEST['SaveWorksheet']) {
                             $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
                             $lastid = GetLastSampleID($lab);
                             //Save complete batch
-                            $completeentry = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                            $resultsrec = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
 
                         } else if ($failedBrotherResult == 'Indeterminate') {
                             //1 Positive, 1 Indeterminate Final Positive
@@ -282,13 +287,17 @@ if ($_REQUEST['SaveWorksheet']) {
                     //If it came from double duplicate it will have failedBrotherId and the result is determined by comparing it with that result
                     if ($failedBrotherID == 0) {
                         //The repeat is now Negative, therefore we need to Collect New Sample. Make this sample Interim (Not Reportable)
-                        $repeatresults = mysql_query("UPDATE samples SET result = '$testresultID', repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
+                        $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID', repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
 
                         //Get details of the Negative sample to be re saved for re test
                         $repeatsampledetails = getSampleetails($labcode[$a]);
                         extract($repeatsampledetails);
+                        $result = 5;
                         //The New sample created has a result of 5 (Collect New Sample)
-                        SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, 5, $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
+                        SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
+                        $lastid = GetLastSampleID($lab);
+                        //Make the new sample Printable & Reportable
+                        $resultsrec = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
                     } else if ($failedBrotherID > 0) {
                         $failedBrotherResult = GetSampleResult($failedBrotherID);
                         if ($failedBrotherResult == 'Negative') {
@@ -306,7 +315,7 @@ if ($_REQUEST['SaveWorksheet']) {
                             $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
                             $lastid = GetLastSampleID($lab);
                             //Save complete batch
-                            $completeentry = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                            $resultsrec = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
 
                         } else if ($failedBrotherResult == 'Indeterminate') {
                             //1 Negative, 1 Indeterminate Collect New Sample: (Make the Negative Interim and create a new one and make it Reportable Collect New Sample)
@@ -320,13 +329,13 @@ if ($_REQUEST['SaveWorksheet']) {
                             $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
                             $lastid = GetLastSampleID($lab);
                             //Save complete batch
-                            $completeentry = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                            $resultsrec = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
                         }
                     }
-                } else if ($testresultID == 3){
+                } else if ($testresultID == 3) {
                     //Get the failedBrotherID column value for this sample
                     $failedBrotherID = GetFailedBrotherID($labcode[$a]);
-                    
+
                     //If this sample came from double duplicate it will have failedBrotherId and the result is determined by comparing it with that result
                     if ($failedBrotherID > 0) {
                         $failedBrotherResult = GetSampleResult($failedBrotherID);
@@ -342,7 +351,7 @@ if ($_REQUEST['SaveWorksheet']) {
                             $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
                             $lastid = GetLastSampleID($lab);
                             //Save complete batch
-                            $completeentry = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                            $resultsrec = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
                         } else if ($failedBrotherResult == 'Indeterminate') {
                             //Both Indeterminate is Collect New Sample: (Make the Negative Interim and create a new one and make it Reportable Collect New Sample)
                             $resultsrec = mysql_query("UPDATE samples SET repeatt = 1, BatchComplete = 0 WHERE (ID='$labcode[$a]')") or die(mysql_error());
@@ -355,7 +364,7 @@ if ($_REQUEST['SaveWorksheet']) {
                             $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
                             $lastid = GetLastSampleID($lab);
                             //Save complete batch
-                            $completeentry = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                            $resultsrec = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
 
                         } else if ($failedBrotherResult == 'Positive') {
                             //1 Indeterminate, 1 Positive Final Positive
@@ -365,9 +374,8 @@ if ($_REQUEST['SaveWorksheet']) {
                 }
             }
         } else if ($paroid == 0) { //Ordinary samples
-            $noofretests = GetNoofRetests($paroid, $labss); //Determine if that sample has a brother
             //update results for the samples
-            $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID' AND bloodspot = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
+            $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID', bloodspot = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
             $withresults = mysql_query("UPDATE pendingtasks SET status = 1 WHERE (sample='$labcode[$a]' AND task=1)") or die(mysql_error());
             //update status of worksheet
             $updateworksheetrec = mysql_query("UPDATE worksheets SET Flag = 1, reviewedby = '$userid', datereviewed = '$datereviewed'
@@ -376,7 +384,7 @@ if ($_REQUEST['SaveWorksheet']) {
             if ($testresultID == 3) {
                 $logger->debug("Sample with ID {$labcode[$a]} has result {$testresultID}");
                 //Update the Indeterminate sample as ready for repeat (repeatt = 1 means Interim sample not Reportable or Printable)
-                $repeatresults = mysql_query("UPDATE samples SET repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
+                $resultsrec = mysql_query("UPDATE samples SET repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
 
                 //Get details of the Indeterminate sample to be re saved for re test
                 $repeatsampledetails = getSampleetails($labcode[$a]);
@@ -386,28 +394,27 @@ if ($_REQUEST['SaveWorksheet']) {
                 while ($count != 2) {
                     //Save the new samples by mirroring the current Indeterminate sample
                     $bloodspot = $bloodspot + 1;
-                    $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
+                    $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, '', $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
                     //Save pending task
                     $task = 3;
                     $status = 0;
                     $lastid = GetLastSampleID($lab);
                     $repeat = SaveRepeatSamplesTask($task, $batchno, $status, $lastid, $lab);
                     //Save complete batch
-                    $completeentry = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1
-                        WHERE (ID = '$lastid')") or die(mysql_error());
+                    $resultsrec = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
 
                     $count = $count + 1;
                 }
             } else if ($testresultID == 6 || $testresultID == 2) {
                 //Update the Failed or Positive sample as ready for repeat (repeatt = 1 means this is now an Interim result Not Reportable or Printable)
-                $repeatresults = mysql_query("UPDATE samples SET result = '$testresultID', repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
+                $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID', repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
 
                 //Get details of the Failed sample to be re saved for re test
                 $repeatsampledetails = getSampleetails($labcode[$a]);
                 extract($repeatsampledetails);
                 $bloodspot = $bloodspot + 1;
                 //Save the Failed or Positive sample detail with new ID with the parent ID of the failed or positive sample
-                $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
+                $saverepeatsample = SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, '', $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
 
                 //save pending task
                 $task = 3;
@@ -415,10 +422,10 @@ if ($_REQUEST['SaveWorksheet']) {
                 $lastid = GetLastSampleID($lab);
                 $repeat = SaveRepeatSamplesTask($task, $batchno, $status, $lastid, $lab);
                 //save complete batch
-                $completeentry = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                $resultsrec = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
             } else { //Negative samples
                 //Update sample to be complete and ready for dispatch
-                $ifcompleterec = mysql_query("UPDATE samples SET result = '$testresultID', repeatt =  0, BatchComplete = 2 WHERE (ID='$labcode[$a]')") or die(mysql_error());
+                $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID', repeatt =  0, BatchComplete = 2 WHERE (ID='$labcode[$a]')") or die(mysql_error());
             } //end if test result
         } //end if for ordinary sample
     } //end if for repeat value
@@ -439,9 +446,9 @@ if ($_REQUEST['SaveWorksheet']) {
         $updateWorksheet = mysql_query($query);
 
         $st = "Test Results for Worksheet No. " . $waksheetno . "  have been successfully approved. " . "<br>" . " They may now be dispatched " . "<br>" . " All of the indeterminates and failed samples have been set aside for retest. ";
-        echo '<script type="text/javascript">';
+        echo "<script type='text/javascript'>";
         echo "window.location.href='dispatch.php?z=$st'";
-        echo '</script>';
+        echo "</script>";
     } else {
         $error = '<center>' . "Failed to Update test results, try again " . '</center>';
     }
@@ -456,16 +463,13 @@ if ($_REQUEST['SaveWorksheet']) {
         $testresultID = GetIDfromtableandname($outcome[$a], "results");
 
         //update results for the samples
-        $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID'
-			 	       WHERE (ID='$labcode[$a]')") or die(mysql_error());
+        $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID' WHERE (ID='$labcode[$a]')") or die(mysql_error());
         $logger->warn("Sample Id = {$labcode[$a]} is assigned Result Id = {$testresultID} and Query returned {$resultsrec}");
 
-        $withresults = mysql_query("UPDATE pendingtasks SET status = 1
-			 		WHERE (sample='$labcode[$a]' AND task=1)") or die(mysql_error());
+        $withresults = mysql_query("UPDATE pendingtasks SET status = 1 WHERE (sample='$labcode[$a]' AND task=1)") or die(mysql_error());
 
         //update status of worksheet
-        $updateworksheetrec = mysql_query("UPDATE worksheets
-                                               SET Flag = 0, reviewedby='$userid',datereviewed='$datereviewed'
+        $updateworksheetrec = mysql_query("UPDATE worksheets SET Flag = 0, reviewedby='$userid', datereviewed='$datereviewed'
 			   		       WHERE ( ((worksheetno = '$waksheetno') AND (ID='$serialno')) )") or die(mysql_error());
         $logger->warn("Worksheet Id = {$serialno} with WorksheetNo = {$waksheetno} is updated and Query returned {$updateworksheetrec}");
 
@@ -487,141 +491,130 @@ if ($_REQUEST['SaveWorksheet']) {
         $updateWorksheet = mysql_query($query);
 
         $st = "First approval completed for worksheet. " . $waksheetno . "<br/> Second approval needed before dispatch.";
-        echo '<script type="text/javascript">';
+        echo "<script type='text/javascript'>";
         echo "window.location.href='worksheetlist.php?p=$st&wtype=0'";
-        echo '</script>';
+        echo "</script>";
     } else {
         $error = '<center>' . "Failed to Update test results, try again " . '</center>';
     }
 }
 ?>
 
-<style type="text/css">
-    select {
-        width: 250;
-    }
-</style>
-<script language="javascript" src="calendar.js"></script>
-<link type="text/css" href="calendar.css" rel="stylesheet" />
-<script type="text/javascript">
-    function reload(form)
-    {
-        var val = form.cat.options[form.cat.options.selectedIndex].value;
-        self.location = 'addsample.php?catt=' + val;
-    }
-</script>
-<script language="JavaScript">
-    function submitPressed() {
-        document.worksheetform.SaveWorksheet.disabled = true;
-        //stuff goes here
-        document.worksheetform.submit();
-    }
-</script>
-<style type="text/css">
-    <!--
-    .style1 {font-weight: bold}
-    -->
-</style>
-<div  class="section">
-    <div class="section-title">WORKSHEET NO <?php echo $worksheetno; ?> RESULTS DETAILS </div>
-    <div class="xtop">
-        <?php
-if ($success != "") {
-    ?>
+    <style type="text/css">
+        select {
+            width: 250;
+        }
+    </style>
+    <script language="javascript" src="calendar.js"></script>
+    <link type="text/css" href="calendar.css" rel="stylesheet" />
+    <script type="text/javascript">
+        function reload(form) {
+            var val = form.cat.options[form.cat.options.selectedIndex].value;
+            self.location = 'addsample.php?catt=' + val;
+        }
+    </script>
+    <script language="JavaScript">
+        function submitPressed() {
+            document.worksheetform.SaveWorksheet.disabled = true;
+            //stuff goes here
+            document.worksheetform.submit();
+        }
+    </script>
+    <div class="section">
+        <div class="section-title">WORKSHEET NO <?php echo $worksheetno; ?> RESULTS DETAILS </div>
+        <div class="xtop">
+            <?php if ($success != "") {?>
             <table>
                 <tr>
                     <td style="width:auto">
                         <div class="success">
-                            <?php
-echo '<strong>' . ' <font color="#666600">' . $success . '</strong>' . ' </font>';
-    ?>
+                            <strong>
+                            <font color="#666600"><?php echo $success; ?></font>
+                        </strong>
                         </div>
                     </td>
                 </tr>
             </table>
-        <?php }?>
-        <?php
+            <?php
+}
 if ($error != "") {
     ?>
             <table>
                 <tr>
                     <td style="width:auto">
                         <div class="error">
-                            <?php
-echo '<strong>' . ' <font color="#666600">' . $error . '</strong>' . ' </font>';
-    ?>
+                            <strong>
+                            <font color="#666600"><?php echo $error; ?></font>
+                        </strong>
                         </div>
                     </td>
                 </tr>
             </table>
-        <?php }?>
-        <form  method="post" action="" name="worksheetform" onSubmit="return confirm('Are you sure you want to approve the below test results as final results?');">
-            <table border="0" class="data-table">
-                <tr>
-                    <td class="comment style1 style4">Serial No </td>
-                    <td>
-                        <span class="comment style1 style4"><?php echo $ID; ?>
+            <?php }?>
+            <form method="post" action="" name="worksheetform" onSubmit="return confirm('Are you sure you want to approve the below test results as final results?');">
+                <table border="0" class="data-table">
+                    <tr>
+                        <td class="comment style1 style4">Serial No </td>
+                        <td>
+                            <span class="comment style1 style4"><?php echo $ID; ?>
                             <span class="style5">
                                 <input type="hidden" name="serialno" value="<?php echo $ID; ?>" />
                             </span>
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="style4 comment">
+                            <strong>Worksheet No</strong>
+                        </td>
+                        <td class="comment">
+                            <span class="style5"><?php echo $worksheetno; ?><input type="hidden" name="waksheetno" value="<?php echo $worksheetno; ?>" />
                         </span>
-                    </td>
-                </tr>
-                <tr>
-                    <td class="style4 comment">
-                        <strong>
-                            Worksheet No
-                        </strong>
-                    </td>
-                    <td class="comment">
-                        <span class="style5">
-                            <?php echo $worksheetno; ?>
-                            <input type="hidden" name="waksheetno" value="<?php echo $worksheetno; ?>" />
-                        </span>
-                    </td>
-                    <td class="comment style1 style4">Lot No </td>
-                    <td>
-                        <span class="comment style1 style4">
-                            <?php echo $Lotno; ?>
-                        </span>
-                    </td>
-                    <td>
-                        <span class="style5"><strong>Date Run </strong></span>
-                    </td>
-                    <td colspan="2"><?php echo $daterun; ?></td>
-                </tr>
-                <tr>
-                    <td class="comment style1 style4">
-                        Date Created
-                    </td>
-                    <td class="comment" ><span class="style5"><?php echo $datecreated; //get current date                                                                  ?></span></td>
-                    <td class="comment style1 style4"><span class="style5"><strong>KIT EXP </strong></span></td>
-                    <td><?php echo $kitexpirydate; ?></td>
-                    <td><span class="style5"><strong>Reviewed By </strong></span></td>
-                    <td colspan="2"><?php echo $reviewedby; ?></td>
-                </tr>
-                <tr>
-                    <td class="comment style1 style4">
-                        Created By
-                    </td>
-                    <td class="comment">
-                        <span class="style5">
+                        </td>
+                        <td class="comment style1 style4">Lot No </td>
+                        <td><span class="comment style1 style4"><?php echo $Lotno; ?></span></td>
+                        <td>
+                            <span class="style5"><strong>Date Run </strong></span>
+                        </td>
+                        <td colspan="2"><?php echo $daterun; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="comment style1 style4">
+                            Date Created
+                        </td>
+                        <td class="comment"><span class="style5"><?php echo $datecreated; //get current date                                                                         ?></span>
+                        </td>
+                        <td class="comment style1 style4"><span class="style5"><strong>KIT EXP </strong></span></td>
+                        <td>
+                            <?php echo $kitexpirydate; ?>
+                        </td>
+                        <td><span class="style5"><strong>Reviewed By </strong></span></td>
+                        <td colspan="2"><?php echo $reviewedby; ?></td>
+                    </tr>
+                    <tr>
+                        <td class="comment style1 style4">
+                            Created By
+                        </td>
+                        <td class="comment">
+                            <span class="style5">
                             <?php echo $creator; ?>
                         </span>
-                    </td>
-                    <td class="comment style1 style4">
-                        <span class="style5"><strong>Date Cut </strong></span></td>
-                    <td>
-                        <?php echo $datecut; ?>
-                    </td>
-                    <td><span class="style5"><strong>Date Reviewed </strong></span></td>
-                    <td colspan="2"><?php echo $datereviewedd; ?></td>
-                </tr>
-                <tr>
-                    <td colspan="7">&nbsp;</td>
-                </tr>
-                <tr>
-                    <?php
+                        </td>
+                        <td class="comment style1 style4">
+                            <span class="style5"><strong>Date Cut </strong></span></td>
+                        <td>
+                            <?php echo $datecut; ?>
+                        </td>
+                        <td><span class="style5"><strong>Date Reviewed </strong></span></td>
+                        <td colspan="2">
+                            <?php echo $datereviewedd; ?>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="7">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <?php
 $count = 1;
 $colcount = 1;
 for ($i = 1; $i <= 2; $i++) {
@@ -633,18 +626,16 @@ for ($i = 1; $i <= 2; $i++) {
 
     $RE = $colcount % 6;
     ?>
-                        <td height="50" bgcolor="#dddddd" class="comment style1 style4"> <?php echo $pc; ?> </td>
-                        <?php
+                            <td height="50" bgcolor="#dddddd" class="comment style1 style4">
+                                <?php echo $pc; ?> </td>
+                            <?php
 $count++;
     $colcount++;
 }
 $scount = 2;
 // this is the list you had, but in PHP terms (in an array)
-$dropDownList = array(
-    "Negative", "Positive",
-    "Indeterminate", "Collect New Sample", "Failed",
-);
-// put data into an array
+$dropDownList = array("Negative", "Positive", "Indeterminate", "Collect New Sample", "Failed");
+//put data into an array
 //$dataArray = mysql_fetch_array($result);
 //$dataArray = mysql_fetch_array($dropDownList);
 $qury = "SELECT
@@ -679,14 +670,13 @@ while (list($ID, $patient, $nmrlstampno) = mysql_fetch_array($result)) {
 
     $RE = $colcount % 6;
     ?>
-                        <td  height="50" width="145px">
-                            NMRL Number: <strong><?php echo $nmrlstampno; ?></strong>
-                            <input name='nmrlstampno[]' type='hidden' id='nmrlstampno' value='<?php echo $nmrlstampno; ?>'/>
-                            <br/>
-                            Lab Code:<input name='labcode[]' type='hidden' id='labcode[]' value='<?php echo $ID; ?>'/>
-                            <?php echo $ID . " " . $paroid; ?>
-                            <br/>
-                        <?php
+                                <td height="50" width="145px">
+                                    NMRL Number: <strong><?php echo $nmrlstampno; ?></strong>
+                                    <input name='nmrlstampno[]' type='hidden' id='nmrlstampno' value='<?php echo $nmrlstampno; ?>' />
+                                    <br /> Lab Code:<input name='labcode[]' type='hidden' id='labcode[]' value='<?php echo $ID; ?>' />
+                                    <?php echo $ID . " " . $paroid; ?>
+                                    <br />
+                                    <?php
 echo "<select name=\"testresult[]\">\n";
 
     foreach ($dropDownList as $listItem) {
@@ -702,32 +692,32 @@ echo "<select name=\"testresult[]\">\n";
     }
     echo "</select>";
     ?>
-                        <?php
+                                        <?php
 echo "  </td>";
     // now output
     $colcount++;
     if ($RE == 0) {
         ?>
-                        </tr>
-                        <?php
+                    </tr>
+                    <?php
 } //end if modulus is 0
 } //end while
 ?>
-                <tr bgcolor="#999999">
-                    <td style="text-align: center;" colspan="7" bgcolor="#00526C">
-                        <?php
+                        <tr bgcolor="#999999">
+                            <td style="text-align: center;" colspan="7" bgcolor="#00526C">
+                                <?php
 if ($worksheet['approvalStatus'] == 0) {
     ?>
-                            <input type="submit" name="FirstApproval" value="First Approval" class="button"  />
-                            <?php
+                                    <input type="submit" name="FirstApproval" value="First Approval" class="button" />
+                                    <?php
 } else if ($worksheet['approvalStatus'] == 1) {
     ?>
-                            <input type="submit" name="SaveWorksheet" value="Confirm & Approve Results" class="button"  />
-                            <?php
+                                        <input type="submit" name="SaveWorksheet" value="Confirm & Approve Results" class="button" />
+                                        <?php
 }
 ?>
-                    </td>
-                </tr>
-            </table>
-        </form>
-        <?php include '../includes/footer.php';?>
+                            </td>
+                        </tr>
+                </table>
+            </form>
+            <?php include '../includes/footer.php';?>
