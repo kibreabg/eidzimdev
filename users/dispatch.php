@@ -112,8 +112,10 @@ if ($accounttype == 1) { //data clerk...redirect to dispatchedresults.php
             //counting the offset
             $offset = ($pageNum - 1) * $rowsPerPage;
             //query database for all districts
-            $query = "SELECT ID,batchno,patient,facility,datereceived,datetested,datemodified,result FROM samples
-			WHERE samples.BatchComplete=2 and samples.Flag=1 and datedispatched = '' and printed = 0 and receivedstatus = 1 and approved = 1 and flag=1 and repeatt=0 order by facility , datetested ASC
+            $query = "SELECT ID,batchno,patient,facility,datereceived,datetested,datemodified,result 
+            FROM samples
+			WHERE samples.BatchComplete=2 and samples.Flag=1  
+            ORDER BY facility , datetested ASC
 			LIMIT $offset, $rowsPerPage";
 
             $resultt = mysql_query($query) or die(mysql_error()); //for main display
