@@ -24,9 +24,7 @@ if ($accounttype == 1) { //data clerk...redirect to dispatchedresults.php
         for (i = document.getElementsByName('checkbox[]').length - 1; i >= 0; i--) {
 
             if (document.getElementsByName('checkbox[]')[i].checked) {
-
                 boxesTicked = boxesTicked + document.getElementsByName('checkbox[]')[i].value + "\n"
-
             }
         }
 
@@ -37,7 +35,6 @@ if ($accounttype == 1) { //data clerk...redirect to dispatchedresults.php
         else {
             return true;
         }
-
     }
 
 </script>
@@ -81,7 +78,7 @@ if ($accounttype == 1) { //data clerk...redirect to dispatchedresults.php
         <?php
         if ($commentsuccess != "") {
             ?> 
-            <table   >
+            <table>
                 <tr>
                     <td style="width:auto" ><div class="success"><?php
         echo '<strong>' . $commentsuccess . '</strong>';
@@ -101,28 +98,26 @@ if ($accounttype == 1) { //data clerk...redirect to dispatchedresults.php
         <form name="myForm" method="post" action="confirmdispatch.php" onsubmit="return checkscript()" >
             <?php
             $rowsPerPage = 30; //number of rows to be displayed per page
-// by default we show first page
+            //by default we show first page
             $pageNum = 1;
 
-// if $_GET['page'] defined, use it as page number
+            //if $_GET['page'] defined, use it as page number
             if (isset($_GET['page'])) {
                 $pageNum = $_GET['page'];
             }
 
             //counting the offset
             $offset = ($pageNum - 1) * $rowsPerPage;
-            //query database for all districts
+            //Fetch samples waiting release and dispatch
             $query = "SELECT ID,batchno,patient,facility,datereceived,datetested,datemodified,result 
             FROM samples
-			WHERE samples.BatchComplete=2 and samples.Flag=1  
-            ORDER BY facility , datetested ASC
+			WHERE BatchComplete=2 AND Flag=1 AND datedispatched = ''  
+            ORDER BY facility, datetested ASC
 			LIMIT $offset, $rowsPerPage";
 
             $resultt = mysql_query($query) or die(mysql_error()); //for main display
 
             $no = mysql_num_rows($resultt);
-
-
 
             if ($no != 0) {
                 ?>

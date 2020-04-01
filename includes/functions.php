@@ -805,7 +805,7 @@ function GetTotalNoBatchesv1()
 function GetTotalCompleteBatches($state, $labss)
 {
     $query = "SELECT ID FROM samples
-					WHERE samples.lab='$labss' AND samples.BatchComplete='$state' and flag=1";
+              WHERE lab='$labss' AND BatchComplete='$state' AND Flag = 1 AND datedispatched = ''";
     $result = mysql_query($query) or die(mysql_error());
     $numrows = mysql_num_rows($result);
     return $numrows;

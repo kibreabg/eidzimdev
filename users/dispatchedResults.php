@@ -110,7 +110,7 @@ if ($accounttype == '1') { //data clerk 1
 
 $checkbox = $_POST['checkbox'];
 $datereleased = date("Y-m-d h:i:s");
-//$datedispatched =date('Y-m-d');
+$datedispatched = date('Y-m-d h:i:s');
 $labcode = $_POST['labcode'];
 $BatchNo = $_POST['BatchNo'];
 $msg = $_POST['msg'];
@@ -120,17 +120,14 @@ $dispatch = $_POST['dispatch'];
 
 if ($dispatch != "" && $checkbox != "") {
 
-    foreach ($checkbox as $a => $b) { //update worksheet items with date dispac v
+    foreach ($checkbox as $a => $b) { 
+        //The sample is released and dispatched at the same time. BatchComplete = 1 means sample is released and dispatched (Completed the cycle)
         $samplerec = mysql_query("UPDATE samples
-					  SET   datereleased = '$datereleased',BatchComplete=1 , DispatchComments='$msg[$a]'
-								   WHERE (ID = '$labcode[$a]')") or die(mysql_error());
-        /* $samplerec = mysql_query("UPDATE samples
-          SET   datedispatched = '$datedispatched',BatchComplete=1 , DispatchComments='$msg[$a]'
-          WHERE (ID = '$labcode[$a]')")or die(mysql_error()); */
-        //update pending tasks
+					              SET datereleased = '$datereleased', datedispatched = '$datedispatched', BatchComplete = 1, DispatchComments='$msg[$a]'
+								  WHERE (ID = '$labcode[$a]')") or die(mysql_error());
         $samplerec = mysql_query("UPDATE pendingtasks
-					  SET   task=2, status = 1,dateupdated='$datereleased'
-								   WHERE (sample = '$labcode[$a]' AND batchno = '$BatchNo[$a]')") or die(mysql_error());
+					              SET task=2, status = 1, dateupdated='$datereleased'
+								  WHERE (sample = '$labcode[$a]' AND batchno = '$BatchNo[$a]')") or die(mysql_error());
 
         //For SMS Print Queue Table
         //----------------------------------
