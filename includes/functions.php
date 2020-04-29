@@ -307,6 +307,14 @@ samples listings, view functions ..........
 .................
 ...............* */
 
+function GetOriginalParentResult($requestNo)
+{
+    $query = "SELECT result FROM samples WHERE patient = '$requestNo' AND parentid = 0";
+    $result = mysql_query($query) or die('Error, query failed');
+    $row = mysql_fetch_array($result, MYSQL_ASSOC);
+    $originalResult = $row['result'];
+    return $originalResult;
+}
 //get patient id
 function GetPatient($batchno, $labss)
 {
@@ -592,6 +600,15 @@ function GetRejectedSamplesPerBatchv1($batchno)
     $rej_samples = $rejrow['rej_samples'];
 
     return $rej_samples;
+}
+
+function GetRequestNo($id)
+{
+    $query = "SELECT patient FROM samples WHERE id = '$id'";
+    $result = mysql_query($query) or die('Error, query failed');
+    $row = mysql_fetch_array($result, MYSQL_ASSOC);
+    $reqNo = $row['patient'];
+    return $reqNo;
 }
 
 //get no of not received samples per batch

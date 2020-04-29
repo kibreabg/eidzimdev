@@ -212,6 +212,7 @@ if ($_REQUEST['SaveWorksheet']) {
                     //Get the parent ID of the current failed sample
                     $parID = getParentID($labcode[$a], $lab);
                     $failedBrotherID = GetFailedBrotherID($parID);
+                    $bloodspot = $bloodspot + 1; // We have used another bloodspot for this failed sample
                     $result = '';
                     SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
 
@@ -244,6 +245,7 @@ if ($_REQUEST['SaveWorksheet']) {
                     $resultsrec = mysql_query("UPDATE samples SET inputcomplete = 1 , approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
 
                 } else if ($testresultID == 2) {
+                    //The repeat is now Positive
                     //Get the failedBrotherID column value for this sample
                     $failedBrotherID = GetFailedBrotherID($labcode[$a]);
 
@@ -279,27 +281,40 @@ if ($_REQUEST['SaveWorksheet']) {
                     }
 
                 } else if ($testresultID == 1) {
+                    //The Result is now Negative
                     //Get the failedBrotherID column value for this sample
                     $failedBrotherID = GetFailedBrotherID($labcode[$a]);
 
                     //Check if this sample is the result of repeats that came from double duplicates or single duplicates
-                    //If it came from single duplicate it wouldn't have failedBrotherID
-                    //If it came from double duplicate it will have failedBrotherId and the result is determined by comparing it with that result
+                    //If it came from single duplicate it wouldn't have failedBrotherID                    
                     if ($failedBrotherID == 0) {
-                        //The repeat is now Negative, therefore we need to Collect New Sample. Make this sample Interim (Not Reportable)
-                        $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID', repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
+                        //First check the result of the original result from which this repeat thread has began
+                        //Check if it is a Failed or a Positive original result
+                        $requestNo = GetRequestNo($labcode[$a]);
+                        $originalResult = GetOriginalParentResult($requestNo);
+                        if($originalResult = 6) {
+                            //If the original result was Failed then final will be Negative
+                            $resultsrec = mysql_query("UPDATE samples SET result = 1, repeatt =  0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());                            
+                        } else {
+                            //The original wasn't Failed
+                            //The repeat is now Negative, therefore we need to Collect New Sample. Make this sample Interim (Not Reportable)
+                            $resultsrec = mysql_query("UPDATE samples SET result = '$testresultID', repeatt = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
 
-                        //Get details of the Negative sample to be re saved for re test
-                        $repeatsampledetails = getSampleetails($labcode[$a]);
-                        extract($repeatsampledetails);
-                        $result = 5;
-                        //The New sample created has a result of 5 (Collect New Sample)
-                        SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
-                        $lastid = GetLastSampleID($lab);
-                        //Make the new sample Printable & Reportable
-                        $resultsrec = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                            //Get details of the Negative sample to be re-saved for re-test
+                            $repeatsampledetails = getSampleetails($labcode[$a]);
+                            extract($repeatsampledetails);
+                            $result = 5;
+                            //The New sample created has a result of 5 (Collect New Sample)
+                            SaveSampleWithResult($patientid, $lab, $batchno, $patient, $facility, $receivedstatus, $spots, $datecollected, $datedispatchedfromfacility, $datereceived, $comments, $labcomment, $labcode[$a], $rejectedreason, $reason_for_repeat, $result, $test_reason, $othertest, $dateenteredindb, $loggedinby, $nmrlstampno, $bloodspot, $failedBrotherID);
+                            $lastid = GetLastSampleID($lab);
+                            //Make the new sample Printable & Reportable
+                            $resultsrec = mysql_query("UPDATE samples SET repeatt = 0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID = '$lastid')") or die(mysql_error());
+                        }
+                        
                     } else if ($failedBrotherID > 0) {
+                        //If it came from double duplicate it will have failedBrotherId and the result is determined by comparing it with that result
                         $failedBrotherResult = GetSampleResult($failedBrotherID);
+
                         if ($failedBrotherResult == 'Negative') {
                             //Both Negative is Final Negative
                             $resultsrec = mysql_query("UPDATE samples SET result = 1, repeatt =  0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());
