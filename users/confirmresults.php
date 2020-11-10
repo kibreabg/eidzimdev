@@ -292,7 +292,7 @@ if ($_REQUEST['SaveWorksheet']) {
                         //Check if it is a Failed or a Positive original result
                         $requestNo = GetRequestNo($labcode[$a]);
                         $originalResult = GetOriginalParentResult($requestNo);
-                        if($originalResult = 6) {
+                        if($originalResult == 6) {
                             //If the original result was Failed then final will be Negative
                             $resultsrec = mysql_query("UPDATE samples SET result = 1, repeatt =  0, BatchComplete = 2, inputcomplete = 1, approved = 1 WHERE (ID='$labcode[$a]')") or die(mysql_error());                            
                         } else {
@@ -348,6 +348,7 @@ if ($_REQUEST['SaveWorksheet']) {
                         }
                     }
                 } else if ($testresultID == 3) {
+                    //The Result is now Indeterminate
                     //Get the failedBrotherID column value for this sample
                     $failedBrotherID = GetFailedBrotherID($labcode[$a]);
 
